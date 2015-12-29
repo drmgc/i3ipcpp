@@ -14,7 +14,7 @@ include_directories(
 	${SIGCPP_INCLUDE_DIRS}
 	3rd/jsoncpp/include
 	3rd/auss/include
-	include/
+	include/i3ipc++
 )
 
 link_directories(
@@ -30,7 +30,7 @@ file(GLOB_RECURSE SRC src/*.cpp)
 add_library(i3ipc++_static STATIC ${SRC})
 
 SET(I3IPCpp_LIBRARY_DIRS ${CMAKE_CURRENT_BINARY_DIR})
-SET(I3IPCpp_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR})
+SET(I3IPCpp_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include/)
 SET(I3IPCpp_LIBRARIES i3ipc++_static ${SIGCPP_LIBRARIES} jsoncpp_lib_static)
 
 find_package(CxxTest)
