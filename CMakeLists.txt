@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.0)
 project(i3ipc++)
 
-OPTION(I3IPCpp_WITH_TESTS "Build unit tests executables" OFF)
+option(I3IPCpp_WITH_TESTS "Build unit tests executables" OFF)
+option(I3IPCpp_BUILD_EXAMPLES "Build example executables" OFF)
 
-SET(BUILD_STATIC_LIBS ON)
-SET(BUILD_SHARED_LIBS OFF)
+set(BUILD_STATIC_LIBS ON)
+set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(3rd/jsoncpp)
 UNSET(BUILD_STATIC_LIBS)
 UNSET(BUILD_SHARED_LIBS)
@@ -31,9 +32,20 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 file(GLOB_RECURSE SRC src/*.cpp)
 add_library(i3ipc++_static STATIC ${SRC})
 
-SET(I3IPCpp_LIBRARY_DIRS ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
-SET(I3IPCpp_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include/ PARENT_SCOPE)
-SET(I3IPCpp_LIBRARIES i3ipc++_static ${SIGCPP_LIBRARIES} jsoncpp_lib_static PARENT_SCOPE)
+set(I3IPCpp_LIBRARY_DIRS ${CMAKE_CURRENT_BINARY_DIR})
+set(I3IPCpp_INCLUDE_DIRS
+	3rd/auss/include
+	${CMAKE_CURRENT_SOURCE_DIR}/include/
+)
+set(I3IPCpp_LIBRARIES i3ipc++_static ${SIGCPP_LIBRARIES} jsoncpp_lib_static)
+
+set(I3IPCpp_LIBRARY_DIRS ${I3IPCpp_LIBRARY_DIRS} PARENT_SCOPE)
+set(I3IPCpp_INCLUDE_DIRS ${I3IPCpp_INCLUDE_DIRS} PARENT_SCOPE)
+set(I3IPCpp_LIBRARIES ${I3IPCpp_LIBRARIES} PARENT_SCOPE)
+
+if(I3IPCpp_BUILD_EXAMPLES)
+	add_subdirectory(examples)
+endif()
 
 if(I3IPCpp_WITH_TESTS)
 	find_package(CxxTest)
