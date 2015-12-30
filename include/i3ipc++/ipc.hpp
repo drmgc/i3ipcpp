@@ -149,7 +149,7 @@ public:
 	 * Example:
 	 * @code{.cpp}
 	 * I3Connection  conn;
-	 * conn.subscribe(lebar::ipc::ET_WORKSPACE | lebar::ipc::ET_WINDOW);
+	 * conn.subscribe(i3ipc::ipc::ET_WORKSPACE | i3ipc::ipc::ET_WINDOW);
 	 * @endcode
 	 * 
 	 * @param  events event type (EventType enum)
