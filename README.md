@@ -4,6 +4,11 @@ i3ipc++
 =======
 An implementation of i3 IPC in C++11.
 
+## Requirements
+
+* C++11 compiler
+* sigc++ 2.0
+
 ## Using
 Yet the only way of using is to add this repo as a submodule
 
@@ -38,3 +43,6 @@ There is few examples in `examples/` directory.
 
 ## Documentation
 The latest documentation you can find [**here**](http://drmgc.github.io/docs/api-ref/i3ipc++/latest/)
+
+## Licensing
+This library is licensed under under the MIT license, but it also uses [`JsonCpp`](https://github.com/open-source-parsers/jsoncpp) (*only for parsing i3's replies*) and my library [`auss`](https://github.com/drmgc/auss)
