@@ -242,8 +242,8 @@ std::vector<output_t>  I3Connection::get_outputs() const {
 		outputs.push_back({
 			.name = name.asString(),
 			.active = active.asBool(),
-			.rect = parse_rect_from_json(rect),
 			.current_workspace = (current_workspace.isNull() ? std::string() : current_workspace.asString()),
+			.rect = parse_rect_from_json(rect),
 		});
 	}
 
