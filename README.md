@@ -23,7 +23,7 @@ Then just type this in your `CMakeLists.txt`:
 add_subdirectory(i3ipc++)
 
 include_directories(${I3IPCpp_INCLUDE_DIRS})
-link_directories(${I3IPCpp_LIBRARY_DIRS)
+link_directories(${I3IPCpp_LIBRARY_DIRS})
 ...
 ```
 
