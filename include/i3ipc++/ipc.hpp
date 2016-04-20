@@ -67,6 +67,7 @@ struct version_t {
 	uint32_t  patch; /**< Patch number of i3 */
 };
 
+
 /**
  * Types of the events of i3
  */
@@ -100,6 +101,56 @@ enum class WindowEventType : char {
 	MOVE = 'M', /**< Window moved */
 	FLOATING = '_', /**< Window toggled floating mode */
 	URGENT = 'u', /**< Window became urgent */
+};
+
+
+/**
+ * A style of a container's border
+ */
+enum class BorderStyle : char {
+	UNKNOWN = '?', //< If got an unknown border style in reply
+	NONE = 'N',
+	NORMAL = 'n',
+	ONE_PIXEL = '1',
+};
+
+
+/**
+ * A type of a container's layout
+ */
+enum class ContainerLayout : char {
+	UNKNOWN = '?', //< If got an unknown border style in reply
+	SPLIT_H = 'h',
+	SPLIT_V = 'v',
+	STACKED = 's',
+	TABBED = 't',
+	DOCKAREA = 'd',
+	OUTPUT = 'o',
+};
+
+
+/**
+ * A node of tree of windows
+ */
+struct container_t {
+	uint64_t  id; ///< The internal ID (actually a C pointer value) of this container. Do not make any assumptions about it. You can use it to (re-)identify and address containers when talking to i3
+	uint64_t  xwindow_id; ///< The X11 window ID of the actual client window inside this container. This field is set to null for split containers or otherwise empty containers. This ID corresponds to what xwininfo(1) and other X11-related tools display (usually in hex)
+	std::string  name; ///< The internal name of this container. For all containers which are part of the tree structure down to the workspace contents, this is set to a nice human-readable name of the container. For containers that have an X11 window, the content is the title (_NET_WM_NAME property) of that window. For all other containers, the content is not defined (yet)
+	std::string  type; ///< Type of this container
+	BorderStyle  border; ///< A style of the container's border
+	std::string  border_raw; ///< A "border" field of TREE reply. NOT empty only if border equals BorderStyle::UNKNOWN
+	uint32_t  current_border_width; ///< Number of pixels of the border width
+	ContainerLayout  layout; ///< A type of the container's layout
+	std::string  layout_raw; ///< A "layout" field of TREE reply. NOT empty only if layout equals ContainerLayout::UNKNOWN
+	float  percent; ///< The percentage which this container takes in its parent. A value of < 0 means that the percent property does not make sense for this container, for example for the root container.
+	rect_t  rect; ///< The absolute display coordinates for this container
+	rect_t  window_rect; ///< The coordinates of the actual client window inside its container. These coordinates are relative to the container and do not include the window decoration (which is actually rendered on the parent container)
+	rect_t  deco_rect; ///< The coordinates of the window decoration inside its container. These coordinates are relative to the container and do not include the actual client window
+	rect_t  geometry; ///< The original geometry the window specified when i3 mapped it. Used when switching a window to floating mode, for example
+	bool  urgent;
+	bool  focused;
+
+	std::list< std::shared_ptr<container_t> >  nodes;
 };
 
 struct buf_t;
@@ -139,6 +190,12 @@ public:
 	 * @return Version of i3
 	 */
 	version_t  get_version() const;
+
+	/**
+	 * Request a tree of windows
+	 * @return A root container
+	 */
+	std::shared_ptr<container_t>  get_tree() const;
 
 	/**
 	 * Subscribe on an events of i3
