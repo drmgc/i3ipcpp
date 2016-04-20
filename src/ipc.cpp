@@ -224,6 +224,80 @@ version_t  I3Connection::get_version() const {
 }
 
 
+static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value&  o) {
+#define i3IPC_TYPE_STR "GET_TREE"
+	std::shared_ptr<container_t>  container (new container_t());
+	IPC_JSON_ASSERT_TYPE_OBJECT(o, "o")
+
+	container->id = o["id"].asUInt64();
+	container->xwindow_id= o["window"].asUInt64();
+	container->name = o["name"].asString();
+	container->type = o["type"].asString();
+	container->current_border_width = o["current_border_width"].asInt();
+	container->percent = o["percent"].asFloat();
+	container->rect = parse_rect_from_json(o["rect"]);
+	container->window_rect = parse_rect_from_json(o["window_rect"]);
+	container->deco_rect = parse_rect_from_json(o["deco_rect"]);
+	container->geometry = parse_rect_from_json(o["geometry"]);
+	container->urgent = o["urgent"].asBool();
+	container->focused = o["focused"].asBool();
+
+	container->border = BorderStyle::UNKNOWN;
+	std::string  border = o["border"].asString();
+	if (border == "normal") {
+		container->border = BorderStyle::NORMAL;
+	} else if (border == "none") {
+		container->border = BorderStyle::NONE;
+	} else if (border == "1pixel") {
+		container->border = BorderStyle::ONE_PIXEL;
+	} else {
+		container->border_raw = border;
+		I3IPC_WARN("Got a unknown \"border\" property: \"" << border << "\". Perhaps its neccessary to update i3ipc++. If you are using latest, note maintainer about this")
+	}
+
+	container->layout = ContainerLayout::UNKNOWN;
+	std::string  layout = o["layout"].asString();
+
+	if (layout == "splith") {
+		container->layout = ContainerLayout::SPLIT_H;
+	} else if (layout == "splitv") {
+		container->layout = ContainerLayout::SPLIT_V;
+	} else if (layout == "stacked") {
+		container->layout = ContainerLayout::STACKED;
+	} else if (layout == "tabbed") {
+		container->layout = ContainerLayout::TABBED;
+	} else if (layout == "dockarea") {
+		container->layout = ContainerLayout::DOCKAREA;
+	} else if (layout == "output") {
+		container->layout = ContainerLayout::OUTPUT;
+	} else {
+		container->layout_raw = border;
+		I3IPC_WARN("Got a unknown \"layout\" property: \"" << layout << "\". Perhaps its neccessary to update i3ipc++. If you are using latest, note maintainer about this")
+	}
+
+	Json::Value  nodes = o["nodes"];
+	if (!nodes.isNull()) {
+		IPC_JSON_ASSERT_TYPE_ARRAY(nodes, "nodes")
+		for (Json::ArrayIndex  i = 0; i < nodes.size(); i++) {
+			container->nodes.push_back(parse_container_from_json(nodes[i]));
+		}
+	}
+
+	return container;
+#undef i3IPC_TYPE_STR
+}
+
+
+std::shared_ptr<container_t>  I3Connection::get_tree() const {
+#define i3IPC_TYPE_STR "GET_TREE"
+	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_TREE);
+	Json::Value  root;
+	IPC_JSON_READ(root);
+	return parse_container_from_json(root);
+#undef i3IPC_TYPE_STR
+}
+
+
 std::vector<output_t>  I3Connection::get_outputs() const {
 #define i3IPC_TYPE_STR "GET_OUTPUTS"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_OUTPUTS);
