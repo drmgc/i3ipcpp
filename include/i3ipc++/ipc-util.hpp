@@ -23,9 +23,9 @@ namespace i3ipc {
  */
 struct header_t {
 	/* 6 = strlen(I3_IPC_MAGIC) */
-	char magic[6]; /**< Magic string @see I3_IPC_MAGIC */
-	uint32_t size; /**< Size of payload */
-	uint32_t type; /**< Message type */
+	char magic[6]; ///< Magic string @see I3_IPC_MAGIC
+	uint32_t size; ///< Size of payload
+	uint32_t type; ///< Message type
 }  __attribute__ ((packed));
 
 
@@ -84,8 +84,8 @@ enum class ReplyType : uint32_t {
  * @brief i3 IPC message buffer
  */
 struct buf_t {
-	uint32_t  size; /**< @brief Size of whole buffer */
-	uint8_t*  data; /**< @brief Pointer to the message */
+	uint32_t  size; ///< @brief Size of whole buffer
+	uint8_t*  data; ///< @brief Pointer to the message
 
 	/**
 	 * @brief i3 IPC message header
