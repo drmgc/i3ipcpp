@@ -51,7 +51,7 @@ inline rect_t  parse_rect_from_json(const Json::Value&  value) {
 
 
 static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value&  o) {
-#define i3IPC_TYPE_STR "GET_TREE" // FIXME
+#define i3IPC_TYPE_STR "PARSE CONTAINER FROM JSON"
 	std::shared_ptr<container_t>  container (new container_t());
 	IPC_JSON_ASSERT_TYPE_OBJECT(o, "o")
 
