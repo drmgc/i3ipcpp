@@ -171,7 +171,7 @@ std::string  get_socketpath() {
 }
 
 
-I3Connection::I3Connection(const std::string&  socket_path) : m_main_socket(i3_connect(socket_path)), m_event_socket(-1), m_subscriptions(0), m_socket_path(socket_path) {
+connection::connection(const std::string&  socket_path) : m_main_socket(i3_connect(socket_path)), m_event_socket(-1), m_subscriptions(0), m_socket_path(socket_path) {
 #define i3IPC_TYPE_STR "i3's event"
 	signal_event.connect([this](EventType  event_type, const std::shared_ptr<const buf_t>&  buf) {
 		switch (event_type) {
@@ -240,18 +240,18 @@ I3Connection::I3Connection(const std::string&  socket_path) : m_main_socket(i3_c
 	});
 #undef i3IPC_TYPE_STR
 }
-I3Connection::~I3Connection() {
+connection::~connection() {
 	i3_disconnect(m_main_socket);
 	if (m_event_socket > 0)
 		i3_disconnect(m_event_socket);
 }
 
 
-void  I3Connection::prepare_to_event_handling() {
+void  connection::prepare_to_event_handling() {
 	m_event_socket = i3_connect(m_socket_path);
 	this->subscribe(m_subscriptions);
 }
-void  I3Connection::handle_event() {
+void  connection::handle_event() {
 	if (m_event_socket <= 0) {
 		throw std::runtime_error("event_socket_fd <= 0");
 	}
@@ -261,7 +261,7 @@ void  I3Connection::handle_event() {
 }
 
 
-bool  I3Connection::subscribe(const int32_t  events) {
+bool  connection::subscribe(const int32_t  events) {
 #define i3IPC_TYPE_STR "SUBSCRIBE"
 	if (m_event_socket <= 0) {
 		m_subscriptions |= events;
@@ -304,7 +304,7 @@ bool  I3Connection::subscribe(const int32_t  events) {
 }
 
 
-version_t  I3Connection::get_version() const {
+version_t  connection::get_version() const {
 #define i3IPC_TYPE_STR "GET_VERSION"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_VERSION);
 	Json::Value  root;
@@ -322,7 +322,7 @@ version_t  I3Connection::get_version() const {
 }
 
 
-std::shared_ptr<container_t>  I3Connection::get_tree() const {
+std::shared_ptr<container_t>  connection::get_tree() const {
 #define i3IPC_TYPE_STR "GET_TREE"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_TREE);
 	Json::Value  root;
@@ -332,7 +332,7 @@ std::shared_ptr<container_t>  I3Connection::get_tree() const {
 }
 
 
-std::vector<output_t>  I3Connection::get_outputs() const {
+std::vector<output_t>  connection::get_outputs() const {
 #define i3IPC_TYPE_STR "GET_OUTPUTS"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_OUTPUTS);
 	Json::Value  root;
@@ -350,7 +350,7 @@ std::vector<output_t>  I3Connection::get_outputs() const {
 }
 
 
-std::vector<workspace_t>  I3Connection::get_workspaces() const {
+std::vector<workspace_t>  connection::get_workspaces() const {
 #define i3IPC_TYPE_STR "GET_WORKSPACES"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_WORKSPACES);
 	Json::Value  root;
@@ -368,7 +368,7 @@ std::vector<workspace_t>  I3Connection::get_workspaces() const {
 }
 
 
-bool  I3Connection::send_command(const std::string&  command) const {
+bool  connection::send_command(const std::string&  command) const {
 #define i3IPC_TYPE_STR "COMMAND"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::COMMAND, command);
 	Json::Value  root;

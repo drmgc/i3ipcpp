@@ -76,7 +76,7 @@ enum EventType {
 	ET_OUTPUT = (1 << 1), ///< Output event
 	ET_MODE = (1 << 2), ///< Output mode event
 	ET_WINDOW = (1 << 3), ///< Window event
-	ET_BARCONFIG_UPDATE = (1 << 4), ///< Bar config update event @attention Yet is not implemented as signal in I3Connection
+	ET_BARCONFIG_UPDATE = (1 << 4), ///< Bar config update event @attention Yet is not implemented as signal in connection
 };
 
 /**
@@ -153,18 +153,23 @@ struct container_t {
 	std::list< std::shared_ptr<container_t> >  nodes;
 };
 
+/**
+ * @deprecated
+ */
+typedef class connection I3Connection;
+
 struct buf_t;
 /**
  * Connection to the i3
  */
-class I3Connection {
+class connection {
 public:
 	/**
 	 * Connect to the i3
 	 * @param  socket_path path to a i3 IPC socket
 	 */
-	I3Connection(const std::string&  socket_path = get_socketpath());
-	~I3Connection();
+	connection(const std::string&  socket_path = get_socketpath());
+	~connection();
 
 	/**
 	 * Send a command to i3
@@ -205,7 +210,7 @@ public:
 	 *
 	 * Example:
 	 * @code{.cpp}
-	 * I3Connection  conn;
+	 * connection  conn;
 	 * conn.subscribe(i3ipc::ipc::ET_WORKSPACE | i3ipc::ipc::ET_WINDOW);
 	 * @endcode
 	 * 

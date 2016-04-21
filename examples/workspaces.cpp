@@ -28,7 +28,7 @@ void  dump_tree_container(const i3ipc::container_t&  c, std::string&  prefix) {
 
 
 int  main() {
-	i3ipc::I3Connection  conn;
+	i3ipc::connection  conn;
 	for (auto&  w : conn.get_workspaces()) {
 		std::cout << '#' << std::hex << w.num << std::dec
 			<< "\n\tName: " << w.name
