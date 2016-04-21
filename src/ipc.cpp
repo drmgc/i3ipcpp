@@ -50,6 +50,104 @@ inline rect_t  parse_rect_from_json(const Json::Value&  value) {
 }
 
 
+static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value&  o) {
+#define i3IPC_TYPE_STR "GET_TREE" // FIXME
+	std::shared_ptr<container_t>  container (new container_t());
+	IPC_JSON_ASSERT_TYPE_OBJECT(o, "o")
+
+	container->id = o["id"].asUInt64();
+	container->xwindow_id= o["window"].asUInt64();
+	container->name = o["name"].asString();
+	container->type = o["type"].asString();
+	container->current_border_width = o["current_border_width"].asInt();
+	container->percent = o["percent"].asFloat();
+	container->rect = parse_rect_from_json(o["rect"]);
+	container->window_rect = parse_rect_from_json(o["window_rect"]);
+	container->deco_rect = parse_rect_from_json(o["deco_rect"]);
+	container->geometry = parse_rect_from_json(o["geometry"]);
+	container->urgent = o["urgent"].asBool();
+	container->focused = o["focused"].asBool();
+
+	container->border = BorderStyle::UNKNOWN;
+	std::string  border = o["border"].asString();
+	if (border == "normal") {
+		container->border = BorderStyle::NORMAL;
+	} else if (border == "none") {
+		container->border = BorderStyle::NONE;
+	} else if (border == "1pixel") {
+		container->border = BorderStyle::ONE_PIXEL;
+	} else {
+		container->border_raw = border;
+		I3IPC_WARN("Got a unknown \"border\" property: \"" << border << "\". Perhaps its neccessary to update i3ipc++. If you are using latest, note maintainer about this")
+	}
+
+	container->layout = ContainerLayout::UNKNOWN;
+	std::string  layout = o["layout"].asString();
+
+	if (layout == "splith") {
+		container->layout = ContainerLayout::SPLIT_H;
+	} else if (layout == "splitv") {
+		container->layout = ContainerLayout::SPLIT_V;
+	} else if (layout == "stacked") {
+		container->layout = ContainerLayout::STACKED;
+	} else if (layout == "tabbed") {
+		container->layout = ContainerLayout::TABBED;
+	} else if (layout == "dockarea") {
+		container->layout = ContainerLayout::DOCKAREA;
+	} else if (layout == "output") {
+		container->layout = ContainerLayout::OUTPUT;
+	} else {
+		container->layout_raw = border;
+		I3IPC_WARN("Got a unknown \"layout\" property: \"" << layout << "\". Perhaps its neccessary to update i3ipc++. If you are using latest, note maintainer about this")
+	}
+
+	Json::Value  nodes = o["nodes"];
+	if (!nodes.isNull()) {
+		IPC_JSON_ASSERT_TYPE_ARRAY(nodes, "nodes")
+		for (Json::ArrayIndex  i = 0; i < nodes.size(); i++) {
+			container->nodes.push_back(parse_container_from_json(nodes[i]));
+		}
+	}
+
+	return container;
+#undef i3IPC_TYPE_STR
+}
+
+static workspace_t  parse_workspace_from_json(const Json::Value&  value) {
+	Json::Value  num = value["num"];
+	Json::Value  name = value["name"];
+	Json::Value  visible = value["visible"];
+	Json::Value  focused = value["focused"];
+	Json::Value  urgent = value["urgent"];
+	Json::Value  rect = value["rect"];
+	Json::Value  output = value["output"];
+
+	return {
+		.num = num.asInt(),
+		.name = name.asString(),
+		.visible = visible.asBool(),
+		.focused = focused.asBool(),
+		.urgent = urgent.asBool(),
+		.rect = parse_rect_from_json(rect),
+		.output = output.asString(),
+	};
+}
+
+static output_t  parse_output_from_json(const Json::Value&  value) {
+	Json::Value  name = value["name"];
+	Json::Value  active = value["active"];
+	Json::Value  current_workspace = value["current_workspace"];
+	Json::Value  rect = value["rect"];
+
+	return {
+		.name = name.asString(),
+		.active = active.asBool(),
+		.current_workspace = (current_workspace.isNull() ? std::string() : current_workspace.asString()),
+		.rect = parse_rect_from_json(rect),
+	};
+}
+
+
 std::string  get_socketpath() {
 	std::string  str;
 	{
@@ -224,70 +322,6 @@ version_t  I3Connection::get_version() const {
 }
 
 
-static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value&  o) {
-#define i3IPC_TYPE_STR "GET_TREE"
-	std::shared_ptr<container_t>  container (new container_t());
-	IPC_JSON_ASSERT_TYPE_OBJECT(o, "o")
-
-	container->id = o["id"].asUInt64();
-	container->xwindow_id= o["window"].asUInt64();
-	container->name = o["name"].asString();
-	container->type = o["type"].asString();
-	container->current_border_width = o["current_border_width"].asInt();
-	container->percent = o["percent"].asFloat();
-	container->rect = parse_rect_from_json(o["rect"]);
-	container->window_rect = parse_rect_from_json(o["window_rect"]);
-	container->deco_rect = parse_rect_from_json(o["deco_rect"]);
-	container->geometry = parse_rect_from_json(o["geometry"]);
-	container->urgent = o["urgent"].asBool();
-	container->focused = o["focused"].asBool();
-
-	container->border = BorderStyle::UNKNOWN;
-	std::string  border = o["border"].asString();
-	if (border == "normal") {
-		container->border = BorderStyle::NORMAL;
-	} else if (border == "none") {
-		container->border = BorderStyle::NONE;
-	} else if (border == "1pixel") {
-		container->border = BorderStyle::ONE_PIXEL;
-	} else {
-		container->border_raw = border;
-		I3IPC_WARN("Got a unknown \"border\" property: \"" << border << "\". Perhaps its neccessary to update i3ipc++. If you are using latest, note maintainer about this")
-	}
-
-	container->layout = ContainerLayout::UNKNOWN;
-	std::string  layout = o["layout"].asString();
-
-	if (layout == "splith") {
-		container->layout = ContainerLayout::SPLIT_H;
-	} else if (layout == "splitv") {
-		container->layout = ContainerLayout::SPLIT_V;
-	} else if (layout == "stacked") {
-		container->layout = ContainerLayout::STACKED;
-	} else if (layout == "tabbed") {
-		container->layout = ContainerLayout::TABBED;
-	} else if (layout == "dockarea") {
-		container->layout = ContainerLayout::DOCKAREA;
-	} else if (layout == "output") {
-		container->layout = ContainerLayout::OUTPUT;
-	} else {
-		container->layout_raw = border;
-		I3IPC_WARN("Got a unknown \"layout\" property: \"" << layout << "\". Perhaps its neccessary to update i3ipc++. If you are using latest, note maintainer about this")
-	}
-
-	Json::Value  nodes = o["nodes"];
-	if (!nodes.isNull()) {
-		IPC_JSON_ASSERT_TYPE_ARRAY(nodes, "nodes")
-		for (Json::ArrayIndex  i = 0; i < nodes.size(); i++) {
-			container->nodes.push_back(parse_container_from_json(nodes[i]));
-		}
-	}
-
-	return container;
-#undef i3IPC_TYPE_STR
-}
-
-
 std::shared_ptr<container_t>  I3Connection::get_tree() const {
 #define i3IPC_TYPE_STR "GET_TREE"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_TREE);
@@ -308,17 +342,7 @@ std::vector<output_t>  I3Connection::get_outputs() const {
 	std::vector<output_t>  outputs;
 
 	for (auto w : root) {
-		Json::Value  name = w["name"];
-		Json::Value  active = w["active"];
-		Json::Value  current_workspace = w["current_workspace"];
-		Json::Value  rect = w["rect"];
-
-		outputs.push_back({
-			.name = name.asString(),
-			.active = active.asBool(),
-			.current_workspace = (current_workspace.isNull() ? std::string() : current_workspace.asString()),
-			.rect = parse_rect_from_json(rect),
-		});
+		outputs.push_back(parse_output_from_json(w));
 	}
 
 	return outputs;
@@ -336,23 +360,7 @@ std::vector<workspace_t>  I3Connection::get_workspaces() const {
 	std::vector<workspace_t>  workspaces;
 
 	for (auto w : root) {
-		Json::Value  num = w["num"];
-		Json::Value  name = w["name"];
-		Json::Value  visible = w["visible"];
-		Json::Value  focused = w["focused"];
-		Json::Value  urgent = w["urgent"];
-		Json::Value  rect = w["rect"];
-		Json::Value  output = w["output"];
-
-		workspaces.push_back({
-			.num = num.asInt(),
-			.name = name.asString(),
-			.visible = visible.asBool(),
-			.focused = focused.asBool(),
-			.urgent = urgent.asBool(),
-			.rect = parse_rect_from_json(rect),
-			.output = output.asString(),
-		});
+		workspaces.push_back(parse_workspace_from_json(w));
 	}
 
 	return workspaces;
