@@ -78,9 +78,12 @@ I3Connection::I3Connection(const std::string&  socket_path) : m_main_socket(i3_c
 	signal_event.connect([this](EventType  event_type, const std::shared_ptr<const buf_t>&  buf) {
 		switch (event_type) {
 		case ET_WORKSPACE: {
-			WorkspaceEventType  type;
 			Json::Value  root;
 			IPC_JSON_READ(root);
+#ifdef USE_FULL_SIGNALS
+			signal_workspace_event.emit(root);
+#else
+			WorkspaceEventType  type;
 			std::string  change = root["change"].asString();
 			if (change == "focus") {
 				type = WorkspaceEventType::FOCUS;
@@ -97,6 +100,7 @@ I3Connection::I3Connection(const std::string&  socket_path) : m_main_socket(i3_c
 			I3IPC_DEBUG("WORKSPACE " << change)
 
 			signal_workspace_event.emit(type);
+#endif
 			break;
 		}
 		case ET_OUTPUT:
@@ -108,9 +112,12 @@ I3Connection::I3Connection(const std::string&  socket_path) : m_main_socket(i3_c
 			signal_mode_event.emit();
 			break;
 		case ET_WINDOW: {
-			WindowEventType  type;
 			Json::Value  root;
 			IPC_JSON_READ(root);
+#ifdef USE_FULL_SIGNALS
+			signal_window_event.emit(root);
+#else
+			WindowEventType  type;
 			std::string  change = root["change"].asString();
 			if (change == "new") {
 				type = WindowEventType::NEW;
@@ -132,6 +139,7 @@ I3Connection::I3Connection(const std::string&  socket_path) : m_main_socket(i3_c
 			I3IPC_DEBUG("WINDOW " << change)
 
 			signal_window_event.emit(type);
+#endif
 			break;
 		}
 		case ET_BARCONFIG_UPDATE:

@@ -5,6 +5,10 @@
 #include <memory>
 #include <vector>
 
+#ifdef USE_FULL_SIGNALS
+#include <json/json.h>
+#endif
+
 #include <sigc++/sigc++.h>
 
 extern "C" {
@@ -78,6 +82,7 @@ enum EventType {
 	ET_BARCONFIG_UPDATE = (1 << 4), /**< Bar config update event @attention Yet is not implemented as signal in I3Connection */
 };
 
+#ifndef USE_FULL_SIGNALS
 /**
  * Types of workspace events
  */
@@ -101,6 +106,7 @@ enum class WindowEventType : char {
 	FLOATING = '_', /**< Window toggled floating mode */
 	URGENT = 'u', /**< Window became urgent */
 };
+#endif
 
 struct buf_t;
 /**
@@ -169,11 +175,16 @@ public:
 	 */
 	void  handle_event();
 
-	sigc::signal<void, WorkspaceEventType>  signal_workspace_event; /**< Workspace event signal */
 	sigc::signal<void>  signal_output_event; /**< Output event signal */
 	sigc::signal<void>  signal_mode_event; /**< Output mode event signal */
-	sigc::signal<void, WindowEventType>  signal_window_event; /**< Window event signal */
 	sigc::signal<void>  signal_barconfig_update_event; /**< Barconfig update event signal */
+#ifdef USE_FULL_SIGNALS
+	sigc::signal<void, const Json::Value&>  signal_workspace_event; /**< Workspace event signal */
+	sigc::signal<void, const Json::Value&>  signal_window_event; /**< Window event signal */
+#else
+	sigc::signal<void, WorkspaceEventType>  signal_workspace_event; /**< Workspace event signal */
+	sigc::signal<void, WindowEventType>  signal_window_event; /**< Window event signal */
+#endif
 	sigc::signal<void, EventType, const std::shared_ptr<const buf_t>&>  signal_event; /**< i3 event signal @note Default handler routes event to signal according to type */
 private:
 	const int32_t  m_main_socket;
