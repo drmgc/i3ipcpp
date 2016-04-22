@@ -5,7 +5,9 @@
 #include <memory>
 #include <vector>
 
-#ifdef USE_FULL_SIGNALS
+#include "i3ipc++_config.hpp"
+
+#ifdef I3IPCpp_USE_FULL_SIGNALS
 #include <json/json.h>
 #endif
 
@@ -82,7 +84,7 @@ enum EventType {
 	ET_BARCONFIG_UPDATE = (1 << 4), /**< Bar config update event @attention Yet is not implemented as signal in I3Connection */
 };
 
-#ifndef USE_FULL_SIGNALS
+#ifndef I3IPCpp_USE_FULL_SIGNALS
 /**
  * Types of workspace events
  */
@@ -178,7 +180,7 @@ public:
 	sigc::signal<void>  signal_output_event; /**< Output event signal */
 	sigc::signal<void>  signal_mode_event; /**< Output mode event signal */
 	sigc::signal<void>  signal_barconfig_update_event; /**< Barconfig update event signal */
-#ifdef USE_FULL_SIGNALS
+#ifdef I3IPCpp_USE_FULL_SIGNALS
 	sigc::signal<void, const Json::Value&>  signal_workspace_event; /**< Workspace event signal */
 	sigc::signal<void, const Json::Value&>  signal_window_event; /**< Window event signal */
 #else

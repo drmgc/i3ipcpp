@@ -4,7 +4,9 @@
 #include <iostream>
 
 #include <auss.hpp>
+#ifndef I3IPCpp_USE_FULL_SIGNALS
 #include <json/json.h>
+#endif
 
 #include "log.hpp"
 #include "ipc-util.hpp"
@@ -80,7 +82,7 @@ I3Connection::I3Connection(const std::string&  socket_path) : m_main_socket(i3_c
 		case ET_WORKSPACE: {
 			Json::Value  root;
 			IPC_JSON_READ(root);
-#ifdef USE_FULL_SIGNALS
+#ifdef I3IPCpp_USE_FULL_SIGNALS
 			signal_workspace_event.emit(root);
 #else
 			WorkspaceEventType  type;
@@ -114,7 +116,7 @@ I3Connection::I3Connection(const std::string&  socket_path) : m_main_socket(i3_c
 		case ET_WINDOW: {
 			Json::Value  root;
 			IPC_JSON_READ(root);
-#ifdef USE_FULL_SIGNALS
+#ifdef I3IPCpp_USE_FULL_SIGNALS
 			signal_window_event.emit(root);
 #else
 			WindowEventType  type;
