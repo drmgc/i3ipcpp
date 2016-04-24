@@ -216,30 +216,35 @@ connection::connection(const std::string&  socket_path) : m_main_socket(i3_conne
 			signal_mode_event.emit();
 			break;
 		case ET_WINDOW: {
-			WindowEventType  type;
+			window_event_t  ev;
 			Json::Value  root;
 			IPC_JSON_READ(root);
 			std::string  change = root["change"].asString();
 			if (change == "new") {
-				type = WindowEventType::NEW;
+				ev.type = WindowEventType::NEW;
 			} else if (change == "close") {
-				type = WindowEventType::CLOSE;
+				ev.type = WindowEventType::CLOSE;
 			} else if (change == "focus") {
-				type = WindowEventType::FOCUS;
+				ev.type = WindowEventType::FOCUS;
 			} else if (change == "title") {
-				type = WindowEventType::TITLE;
+				ev.type = WindowEventType::TITLE;
 			} else if (change == "fullscreen_mode") {
-				type = WindowEventType::FULLSCREEN_MODE;
+				ev.type = WindowEventType::FULLSCREEN_MODE;
 			} else if (change == "move") {
-				type = WindowEventType::MOVE;
+				ev.type = WindowEventType::MOVE;
 			} else if (change == "floating") {
-				type = WindowEventType::FLOATING;
+				ev.type = WindowEventType::FLOATING;
 			} else if (change == "urgent") {
-				type = WindowEventType::URGENT;
+				ev.type = WindowEventType::URGENT;
 			}
 			I3IPC_DEBUG("WINDOW " << change)
 
-			signal_window_event.emit(type);
+			Json::Value  container = root["container"];
+			if (!container.isNull()) {
+				ev.container = parse_container_from_json(container);
+			}
+
+			signal_window_event.emit(ev);
 			break;
 		}
 		case ET_BARCONFIG_UPDATE:

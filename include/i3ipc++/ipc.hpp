@@ -165,6 +165,15 @@ struct workspace_event_t {
 
 
 /**
+ * A window event
+ */
+struct window_event_t {
+	WindowEventType  type;
+	std::shared_ptr<container_t>  container; ///< A container event associated with @note With some WindowEventType could be null
+};
+
+
+/**
  * @deprecated
  */
 typedef class connection I3Connection;
@@ -245,7 +254,7 @@ public:
 	sigc::signal<void, const workspace_event_t&>  signal_workspace_event; ///< Workspace event signal
 	sigc::signal<void>  signal_output_event; ///< Output event signal
 	sigc::signal<void>  signal_mode_event; ///< Output mode event signal
-	sigc::signal<void, WindowEventType>  signal_window_event; ///< Window event signal
+	sigc::signal<void, const window_event_t&>  signal_window_event; ///< Window event signal
 	sigc::signal<void>  signal_barconfig_update_event; ///< Barconfig update event signal
 	sigc::signal<void, EventType, const std::shared_ptr<const buf_t>&>  signal_event; ///< i3 event signal @note Default handler routes event to signal according to type
 private:
