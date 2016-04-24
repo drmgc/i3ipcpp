@@ -113,7 +113,7 @@ static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value
 #undef i3IPC_TYPE_STR
 }
 
-static workspace_t  parse_workspace_from_json(const Json::Value&  value) {
+static std::shared_ptr<workspace_t>  parse_workspace_from_json(const Json::Value&  value) {
 	Json::Value  num = value["num"];
 	Json::Value  name = value["name"];
 	Json::Value  visible = value["visible"];
@@ -122,29 +122,29 @@ static workspace_t  parse_workspace_from_json(const Json::Value&  value) {
 	Json::Value  rect = value["rect"];
 	Json::Value  output = value["output"];
 
-	return {
-		.num = num.asInt(),
-		.name = name.asString(),
-		.visible = visible.asBool(),
-		.focused = focused.asBool(),
-		.urgent = urgent.asBool(),
-		.rect = parse_rect_from_json(rect),
-		.output = output.asString(),
-	};
+	std::shared_ptr<workspace_t>  p;
+	p->num = num.asInt();
+	p->name = name.asString();
+	p->visible = visible.asBool();
+	p->focused = focused.asBool();
+	p->urgent = urgent.asBool();
+	p->rect = parse_rect_from_json(rect);
+	p->output = output.asString();
+	return p;
 }
 
-static output_t  parse_output_from_json(const Json::Value&  value) {
+static std::shared_ptr<output_t>  parse_output_from_json(const Json::Value&  value) {
 	Json::Value  name = value["name"];
 	Json::Value  active = value["active"];
 	Json::Value  current_workspace = value["current_workspace"];
 	Json::Value  rect = value["rect"];
 
-	return {
-		.name = name.asString(),
-		.active = active.asBool(),
-		.current_workspace = (current_workspace.isNull() ? std::string() : current_workspace.asString()),
-		.rect = parse_rect_from_json(rect),
-	};
+	std::shared_ptr<output_t>  p;
+	p->name = name.asString();
+	p->active = active.asBool();
+	p->current_workspace = (current_workspace.isNull() ? std::string() : current_workspace.asString());
+	p->rect = parse_rect_from_json(rect);
+	return p;
 }
 
 
@@ -332,14 +332,14 @@ std::shared_ptr<container_t>  connection::get_tree() const {
 }
 
 
-std::vector<output_t>  connection::get_outputs() const {
+std::vector< std::shared_ptr<output_t> >  connection::get_outputs() const {
 #define i3IPC_TYPE_STR "GET_OUTPUTS"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_OUTPUTS);
 	Json::Value  root;
 	IPC_JSON_READ(root)
 	IPC_JSON_ASSERT_TYPE_ARRAY(root, "root")
 
-	std::vector<output_t>  outputs;
+	std::vector< std::shared_ptr<output_t> >  outputs;
 
 	for (auto w : root) {
 		outputs.push_back(parse_output_from_json(w));
@@ -350,14 +350,14 @@ std::vector<output_t>  connection::get_outputs() const {
 }
 
 
-std::vector<workspace_t>  connection::get_workspaces() const {
+std::vector< std::shared_ptr<workspace_t> >  connection::get_workspaces() const {
 #define i3IPC_TYPE_STR "GET_WORKSPACES"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_WORKSPACES);
 	Json::Value  root;
 	IPC_JSON_READ(root)
 	IPC_JSON_ASSERT_TYPE_ARRAY(root, "root")
 
-	std::vector<workspace_t>  workspaces;
+	std::vector< std::shared_ptr<workspace_t> >  workspaces;
 
 	for (auto w : root) {
 		workspaces.push_back(parse_workspace_from_json(w));

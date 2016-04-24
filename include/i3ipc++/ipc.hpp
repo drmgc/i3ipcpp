@@ -182,13 +182,13 @@ public:
 	 * Request a list of workspaces
 	 * @return List of workspaces
 	 */
-	std::vector<workspace_t>  get_workspaces() const;
+	std::vector< std::shared_ptr<workspace_t> >  get_workspaces() const;
 
 	/**
 	 * Request a list of outputs
 	 * @return List of outputs
 	 */
-	std::vector<output_t>  get_outputs() const;
+	std::vector< std::shared_ptr<output_t> >  get_outputs() const;
 
 	/**
 	 * Request a version of i3
