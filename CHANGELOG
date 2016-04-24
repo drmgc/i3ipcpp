@@ -1,3 +1,7 @@
+0.2.1
+	+ Added example of event handling
+	* Fixed SIGSEGV in parse_*_from_json functions
+
 0.2.0
 	+ Implemented GET_TREE (i3ipc::connection::get_tree())
 
