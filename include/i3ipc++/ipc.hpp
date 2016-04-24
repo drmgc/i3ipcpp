@@ -153,6 +153,26 @@ struct container_t {
 	std::list< std::shared_ptr<container_t> >  nodes;
 };
 
+
+/**
+ * A workspace event
+ */
+struct workspace_event_t {
+	WorkspaceEventType  type;
+	std::shared_ptr<workspace_t>  current; ///< Current focused workspace
+	std::shared_ptr<workspace_t>  old; ///< Old (previous) workspace @note With some WindowEventType could be null
+};
+
+
+/**
+ * A window event
+ */
+struct window_event_t {
+	WindowEventType  type;
+	std::shared_ptr<container_t>  container; ///< A container event associated with @note With some WindowEventType could be null
+};
+
+
 /**
  * @deprecated
  */
@@ -182,13 +202,13 @@ public:
 	 * Request a list of workspaces
 	 * @return List of workspaces
 	 */
-	std::vector<workspace_t>  get_workspaces() const;
+	std::vector< std::shared_ptr<workspace_t> >  get_workspaces() const;
 
 	/**
 	 * Request a list of outputs
 	 * @return List of outputs
 	 */
-	std::vector<output_t>  get_outputs() const;
+	std::vector< std::shared_ptr<output_t> >  get_outputs() const;
 
 	/**
 	 * Request a version of i3
@@ -231,10 +251,10 @@ public:
 	 */
 	void  handle_event();
 
-	sigc::signal<void, WorkspaceEventType>  signal_workspace_event; ///< Workspace event signal
+	sigc::signal<void, const workspace_event_t&>  signal_workspace_event; ///< Workspace event signal
 	sigc::signal<void>  signal_output_event; ///< Output event signal
 	sigc::signal<void>  signal_mode_event; ///< Output mode event signal
-	sigc::signal<void, WindowEventType>  signal_window_event; ///< Window event signal
+	sigc::signal<void, const window_event_t&>  signal_window_event; ///< Window event signal
 	sigc::signal<void>  signal_barconfig_update_event; ///< Barconfig update event signal
 	sigc::signal<void, EventType, const std::shared_ptr<const buf_t>&>  signal_event; ///< i3 event signal @note Default handler routes event to signal according to type
 private:

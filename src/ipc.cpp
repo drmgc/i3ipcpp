@@ -113,7 +113,7 @@ static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value
 #undef i3IPC_TYPE_STR
 }
 
-static workspace_t  parse_workspace_from_json(const Json::Value&  value) {
+static std::shared_ptr<workspace_t>  parse_workspace_from_json(const Json::Value&  value) {
 	Json::Value  num = value["num"];
 	Json::Value  name = value["name"];
 	Json::Value  visible = value["visible"];
@@ -122,29 +122,29 @@ static workspace_t  parse_workspace_from_json(const Json::Value&  value) {
 	Json::Value  rect = value["rect"];
 	Json::Value  output = value["output"];
 
-	return {
-		.num = num.asInt(),
-		.name = name.asString(),
-		.visible = visible.asBool(),
-		.focused = focused.asBool(),
-		.urgent = urgent.asBool(),
-		.rect = parse_rect_from_json(rect),
-		.output = output.asString(),
-	};
+	std::shared_ptr<workspace_t>  p;
+	p->num = num.asInt();
+	p->name = name.asString();
+	p->visible = visible.asBool();
+	p->focused = focused.asBool();
+	p->urgent = urgent.asBool();
+	p->rect = parse_rect_from_json(rect);
+	p->output = output.asString();
+	return p;
 }
 
-static output_t  parse_output_from_json(const Json::Value&  value) {
+static std::shared_ptr<output_t>  parse_output_from_json(const Json::Value&  value) {
 	Json::Value  name = value["name"];
 	Json::Value  active = value["active"];
 	Json::Value  current_workspace = value["current_workspace"];
 	Json::Value  rect = value["rect"];
 
-	return {
-		.name = name.asString(),
-		.active = active.asBool(),
-		.current_workspace = (current_workspace.isNull() ? std::string() : current_workspace.asString()),
-		.rect = parse_rect_from_json(rect),
-	};
+	std::shared_ptr<output_t>  p;
+	p->name = name.asString();
+	p->active = active.asBool();
+	p->current_workspace = (current_workspace.isNull() ? std::string() : current_workspace.asString());
+	p->rect = parse_rect_from_json(rect);
+	return p;
 }
 
 
@@ -176,25 +176,35 @@ connection::connection(const std::string&  socket_path) : m_main_socket(i3_conne
 	signal_event.connect([this](EventType  event_type, const std::shared_ptr<const buf_t>&  buf) {
 		switch (event_type) {
 		case ET_WORKSPACE: {
-			WorkspaceEventType  type;
+			workspace_event_t  ev;
 			Json::Value  root;
 			IPC_JSON_READ(root);
 			std::string  change = root["change"].asString();
 			if (change == "focus") {
-				type = WorkspaceEventType::FOCUS;
+				ev.type = WorkspaceEventType::FOCUS;
 			} else if (change == "init") {
-				type = WorkspaceEventType::INIT;
+				ev.type = WorkspaceEventType::INIT;
 			} else if (change == "empty") {
-				type = WorkspaceEventType::EMPTY;
+				ev.type = WorkspaceEventType::EMPTY;
 			} else if (change == "urgent") {
-				type = WorkspaceEventType::URGENT;
+				ev.type = WorkspaceEventType::URGENT;
 			} else {
 				I3IPC_WARN("Unknown workspace event type " << change)
 				break;
 			}
 			I3IPC_DEBUG("WORKSPACE " << change)
 
-			signal_workspace_event.emit(type);
+			Json::Value  current = root["current"];
+			Json::Value  old = root["current"];
+
+			if (!current.isNull()) {
+				ev.current = parse_workspace_from_json(current);
+			}
+			if (!old.isNull()) {
+				ev.old = parse_workspace_from_json(old);
+			}
+
+			signal_workspace_event.emit(ev);
 			break;
 		}
 		case ET_OUTPUT:
@@ -206,30 +216,35 @@ connection::connection(const std::string&  socket_path) : m_main_socket(i3_conne
 			signal_mode_event.emit();
 			break;
 		case ET_WINDOW: {
-			WindowEventType  type;
+			window_event_t  ev;
 			Json::Value  root;
 			IPC_JSON_READ(root);
 			std::string  change = root["change"].asString();
 			if (change == "new") {
-				type = WindowEventType::NEW;
+				ev.type = WindowEventType::NEW;
 			} else if (change == "close") {
-				type = WindowEventType::CLOSE;
+				ev.type = WindowEventType::CLOSE;
 			} else if (change == "focus") {
-				type = WindowEventType::FOCUS;
+				ev.type = WindowEventType::FOCUS;
 			} else if (change == "title") {
-				type = WindowEventType::TITLE;
+				ev.type = WindowEventType::TITLE;
 			} else if (change == "fullscreen_mode") {
-				type = WindowEventType::FULLSCREEN_MODE;
+				ev.type = WindowEventType::FULLSCREEN_MODE;
 			} else if (change == "move") {
-				type = WindowEventType::MOVE;
+				ev.type = WindowEventType::MOVE;
 			} else if (change == "floating") {
-				type = WindowEventType::FLOATING;
+				ev.type = WindowEventType::FLOATING;
 			} else if (change == "urgent") {
-				type = WindowEventType::URGENT;
+				ev.type = WindowEventType::URGENT;
 			}
 			I3IPC_DEBUG("WINDOW " << change)
 
-			signal_window_event.emit(type);
+			Json::Value  container = root["container"];
+			if (!container.isNull()) {
+				ev.container = parse_container_from_json(container);
+			}
+
+			signal_window_event.emit(ev);
 			break;
 		}
 		case ET_BARCONFIG_UPDATE:
@@ -332,14 +347,14 @@ std::shared_ptr<container_t>  connection::get_tree() const {
 }
 
 
-std::vector<output_t>  connection::get_outputs() const {
+std::vector< std::shared_ptr<output_t> >  connection::get_outputs() const {
 #define i3IPC_TYPE_STR "GET_OUTPUTS"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_OUTPUTS);
 	Json::Value  root;
 	IPC_JSON_READ(root)
 	IPC_JSON_ASSERT_TYPE_ARRAY(root, "root")
 
-	std::vector<output_t>  outputs;
+	std::vector< std::shared_ptr<output_t> >  outputs;
 
 	for (auto w : root) {
 		outputs.push_back(parse_output_from_json(w));
@@ -350,14 +365,14 @@ std::vector<output_t>  connection::get_outputs() const {
 }
 
 
-std::vector<workspace_t>  connection::get_workspaces() const {
+std::vector< std::shared_ptr<workspace_t> >  connection::get_workspaces() const {
 #define i3IPC_TYPE_STR "GET_WORKSPACES"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_WORKSPACES);
 	Json::Value  root;
 	IPC_JSON_READ(root)
 	IPC_JSON_ASSERT_TYPE_ARRAY(root, "root")
 
-	std::vector<workspace_t>  workspaces;
+	std::vector< std::shared_ptr<workspace_t> >  workspaces;
 
 	for (auto w : root) {
 		workspaces.push_back(parse_workspace_from_json(w));
