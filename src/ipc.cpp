@@ -52,6 +52,8 @@ inline rect_t  parse_rect_from_json(const Json::Value&  value) {
 
 static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value&  o) {
 #define i3IPC_TYPE_STR "PARSE CONTAINER FROM JSON"
+	if (o.isNull())
+		return std::shared_ptr<container_t>();
 	std::shared_ptr<container_t>  container (new container_t());
 	IPC_JSON_ASSERT_TYPE_OBJECT(o, "o")
 
@@ -114,6 +116,8 @@ static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value
 }
 
 static std::shared_ptr<workspace_t>  parse_workspace_from_json(const Json::Value&  value) {
+	if (value.isNull())
+		return std::shared_ptr<workspace_t>();
 	Json::Value  num = value["num"];
 	Json::Value  name = value["name"];
 	Json::Value  visible = value["visible"];
@@ -122,7 +126,7 @@ static std::shared_ptr<workspace_t>  parse_workspace_from_json(const Json::Value
 	Json::Value  rect = value["rect"];
 	Json::Value  output = value["output"];
 
-	std::shared_ptr<workspace_t>  p;
+	std::shared_ptr<workspace_t>  p (new workspace_t());
 	p->num = num.asInt();
 	p->name = name.asString();
 	p->visible = visible.asBool();
@@ -134,12 +138,14 @@ static std::shared_ptr<workspace_t>  parse_workspace_from_json(const Json::Value
 }
 
 static std::shared_ptr<output_t>  parse_output_from_json(const Json::Value&  value) {
+	if (value.isNull())
+		return std::shared_ptr<output_t>();
 	Json::Value  name = value["name"];
 	Json::Value  active = value["active"];
 	Json::Value  current_workspace = value["current_workspace"];
 	Json::Value  rect = value["rect"];
 
-	std::shared_ptr<output_t>  p;
+	std::shared_ptr<output_t>  p (new output_t());
 	p->name = name.asString();
 	p->active = active.asBool();
 	p->current_workspace = (current_workspace.isNull() ? std::string() : current_workspace.asString());
