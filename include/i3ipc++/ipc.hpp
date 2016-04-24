@@ -173,11 +173,6 @@ struct window_event_t {
 };
 
 
-/**
- * @deprecated
- */
-typedef class connection I3Connection;
-
 struct buf_t;
 /**
  * Connection to the i3
