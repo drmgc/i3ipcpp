@@ -1,0 +1,10 @@
+0.2.0
+	+ Implemented GET_TREE (i3ipc::connection::get_tree())
+
+	~ Shipping all available payload with workspace and window events (issue #2)
+	~ i3ipc::I3Connection renamed to i3ipc::connection
+
+	~ Internal refreactoring
+
+	* Fixing failed build: Parts of a struct were initialised in wrong order, C99-style designated initialisers did not prevent this from causing an error [mox]
+	* Minor documentation and code fixies
