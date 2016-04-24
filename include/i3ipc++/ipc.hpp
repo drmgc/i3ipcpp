@@ -153,6 +153,17 @@ struct container_t {
 	std::list< std::shared_ptr<container_t> >  nodes;
 };
 
+
+/**
+ * A workspace event
+ */
+struct workspace_event_t {
+	WorkspaceEventType  type;
+	std::shared_ptr<workspace_t>  current; ///< Current focused workspace
+	std::shared_ptr<workspace_t>  old; ///< Old (previous) workspace @note With some WindowEventType could be null
+};
+
+
 /**
  * @deprecated
  */
@@ -231,7 +242,7 @@ public:
 	 */
 	void  handle_event();
 
-	sigc::signal<void, WorkspaceEventType>  signal_workspace_event; ///< Workspace event signal
+	sigc::signal<void, const workspace_event_t&>  signal_workspace_event; ///< Workspace event signal
 	sigc::signal<void>  signal_output_event; ///< Output event signal
 	sigc::signal<void>  signal_mode_event; ///< Output mode event signal
 	sigc::signal<void, WindowEventType>  signal_window_event; ///< Window event signal

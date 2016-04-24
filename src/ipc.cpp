@@ -176,25 +176,35 @@ connection::connection(const std::string&  socket_path) : m_main_socket(i3_conne
 	signal_event.connect([this](EventType  event_type, const std::shared_ptr<const buf_t>&  buf) {
 		switch (event_type) {
 		case ET_WORKSPACE: {
-			WorkspaceEventType  type;
+			workspace_event_t  ev;
 			Json::Value  root;
 			IPC_JSON_READ(root);
 			std::string  change = root["change"].asString();
 			if (change == "focus") {
-				type = WorkspaceEventType::FOCUS;
+				ev.type = WorkspaceEventType::FOCUS;
 			} else if (change == "init") {
-				type = WorkspaceEventType::INIT;
+				ev.type = WorkspaceEventType::INIT;
 			} else if (change == "empty") {
-				type = WorkspaceEventType::EMPTY;
+				ev.type = WorkspaceEventType::EMPTY;
 			} else if (change == "urgent") {
-				type = WorkspaceEventType::URGENT;
+				ev.type = WorkspaceEventType::URGENT;
 			} else {
 				I3IPC_WARN("Unknown workspace event type " << change)
 				break;
 			}
 			I3IPC_DEBUG("WORKSPACE " << change)
 
-			signal_workspace_event.emit(type);
+			Json::Value  current = root["current"];
+			Json::Value  old = root["current"];
+
+			if (!current.isNull()) {
+				ev.current = parse_workspace_from_json(current);
+			}
+			if (!old.isNull()) {
+				ev.old = parse_workspace_from_json(old);
+			}
+
+			signal_workspace_event.emit(ev);
 			break;
 		}
 		case ET_OUTPUT:
