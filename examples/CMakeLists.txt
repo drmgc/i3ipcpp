@@ -15,3 +15,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 
 add_executable(workspaces workspaces.cpp)
 target_link_libraries(workspaces ${I3IPCpp_LIBRARIES})
+
+add_executable(events events.cpp)
+target_link_libraries(events ${I3IPCpp_LIBRARIES})
