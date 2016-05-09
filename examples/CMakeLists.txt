@@ -18,3 +18,6 @@ target_link_libraries(workspaces ${I3IPCpp_LIBRARIES})
 
 add_executable(events events.cpp)
 target_link_libraries(events ${I3IPCpp_LIBRARIES})
+
+add_executable(multifd multi_fd.cpp)
+target_link_libraries(multifd ${I3IPCpp_LIBRARIES})

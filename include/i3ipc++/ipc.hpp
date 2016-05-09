@@ -4,11 +4,13 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <map>
 
 #include <sigc++/sigc++.h>
 
 extern "C" {
 #include <i3/ipc.h>
+#include <poll.h>
 }
 
 /**
@@ -246,6 +248,29 @@ public:
 	 */
 	void  handle_event();
 
+	/**
+	 * Add a fill descriptor to check for event at the same time as i3.
+	 * 
+	 * @param fd the fill descriptor to watch.
+	 * @return the signal associated to the file desciptor.
+	 */
+	sigc::signal<void>& add_fd(int32_t fd);
+
+	/**
+	 * Remove a fill descriptor to check for event at the same time as i3.
+	 * 
+	 * @param fd the fill descriptor to remove.
+	 */
+	void remove_fd(int32_t fd);
+
+	/**
+	 * Retrieve the signal associated to the file descriptor
+	 * 
+	 * @param fd the fill descriptor.
+	 * @return the signal associated to it.
+	 */
+	sigc::signal<void>& get_fd_signal(int32_t fd);
+
 	sigc::signal<void, const workspace_event_t&>  signal_workspace_event; ///< Workspace event signal
 	sigc::signal<void>  signal_output_event; ///< Output event signal
 	sigc::signal<void>  signal_mode_event; ///< Output mode event signal
@@ -257,6 +282,8 @@ private:
 	int32_t  m_event_socket;
 	int32_t  m_subscriptions;
 	const std::string  m_socket_path;
+	std::vector<struct pollfd> m_pollin;
+	std::map< int32_t, sigc::signal<void> > m_signals;
 };
 
 }
