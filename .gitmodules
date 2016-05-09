@@ -3,4 +3,4 @@
 	url = https://github.com/drmgc/auss.git
 [submodule "3rd/jsoncpp"]
 	path = 3rd/jsoncpp
-	url = https://github.com/open-source-parsers/jsoncpp
+	url = https://github.com/open-source-parsers/jsoncpp.git

@@ -269,16 +269,37 @@ connection::~connection() {
 
 
 void  connection::prepare_to_event_handling() {
+	if (m_event_socket > 0)
+		return;
 	m_event_socket = i3_connect(m_socket_path);
+	if (m_event_socket < 0)
+		return;
 	this->subscribe(m_subscriptions);
+
+	m_pollin.push_back(pollfd{.fd=m_event_socket, .events=POLLIN, .revents=0});
 }
+
 void  connection::handle_event() {
 	if (m_event_socket <= 0) {
 		throw std::runtime_error("event_socket_fd <= 0");
 	}
-	auto  buf = i3_recv(m_event_socket);
-
-	this->signal_event.emit(static_cast<EventType>(1 << (buf->header->type & 0x7f)), std::static_pointer_cast<const buf_t>(buf));
+    if (poll(m_pollin.data(), m_pollin.size(), -1) > 0) {
+    	for (std::vector<struct pollfd>::iterator it = m_pollin.begin() ; it != m_pollin.end(); ) {
+    		if ( it->fd == m_event_socket ) {
+    			if ( it->revents & POLLIN ) {
+    				auto  buf = i3_recv(m_event_socket);
+					this->signal_event.emit(static_cast<EventType>(1 << (buf->header->type & 0x7f)), std::static_pointer_cast<const buf_t>(buf));
+				}
+    		} else if (it->revents & POLLIN) {
+    			m_signals[it->fd].emit();
+    		} else if (it->revents & POLLHUP) {
+    			m_signals.erase(it->fd);
+    			it = m_pollin.erase(it);
+    			continue;
+    		}
+    		++it;
+    	}
+	}
 }
 
 
@@ -408,6 +429,23 @@ bool  connection::send_command(const std::string&  command) const {
 		return false;
 	}
 #undef i3IPC_TYPE_STR
+}
+
+sigc::signal<void>& connection::add_fd(int32_t fd) {
+	m_pollin.push_back(pollfd{.fd=fd, .events=POLLIN, .revents=0});
+	m_signals[fd] = sigc::signal<void>();
+	return m_signals[fd];
+}
+
+void connection::remove_fd(int32_t fd) {
+	for (std::vector<struct pollfd>::iterator it = m_pollin.begin() ; it != m_pollin.end(); )
+		if ( it->fd == fd )
+			m_pollin.erase(it);
+	m_signals.erase(fd);
+}
+
+sigc::signal<void>& connection::get_fd_signal(int32_t fd) {
+	return m_signals[fd];
 }
 
 }
