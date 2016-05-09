@@ -410,4 +410,8 @@ bool  connection::send_command(const std::string&  command) const {
 #undef i3IPC_TYPE_STR
 }
 
+int32_t connection::get_file_descriptor() {
+	return m_event_socket;
+}
+
 }
