@@ -246,6 +246,12 @@ public:
 	 */
 	void  handle_event();
 
+	/**
+	 * Get the file descriptor associated to i3.
+	 * @return the file descriptor associated to i3, -1 if not created yet.
+	 */
+	int32_t get_file_descriptor();
+
 	sigc::signal<void, const workspace_event_t&>  signal_workspace_event; ///< Workspace event signal
 	sigc::signal<void>  signal_output_event; ///< Output event signal
 	sigc::signal<void>  signal_mode_event; ///< Output mode event signal
