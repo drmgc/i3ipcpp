@@ -21,7 +21,7 @@ include_directories(
 )
 
 link_directories(
-	${SIBCPP_LIBRARY_DIRS}
+	${SIGCPP_LIBRARY_DIRS}
 	3rd/jsoncpp/src/lib_json/
 )
 
@@ -34,6 +34,7 @@ add_library(i3ipc++_static STATIC ${SRC})
 
 set(I3IPCpp_LIBRARY_DIRS ${CMAKE_CURRENT_BINARY_DIR})
 set(I3IPCpp_INCLUDE_DIRS
+	${SIGCPP_INCLUDE_DIRS}
 	3rd/auss/include
 	${CMAKE_CURRENT_SOURCE_DIR}/include/
 )
