@@ -5,12 +5,6 @@
 #include <memory>
 #include <vector>
 
-#include "i3ipc++_config.hpp"
-
-#ifdef I3IPCpp_USE_FULL_SIGNALS
-#include <json/json.h>
-#endif
-
 #include <sigc++/sigc++.h>
 
 extern "C" {
@@ -85,7 +79,6 @@ enum EventType {
 	ET_BARCONFIG_UPDATE = (1 << 4), ///< Bar config update event @attention Yet is not implemented as signal in connection
 };
 
-#ifndef I3IPCpp_USE_FULL_SIGNALS
 /**
  * Types of workspace events
  */
@@ -118,6 +111,7 @@ enum class BorderStyle : char {
 	UNKNOWN = '?', //< If got an unknown border style in reply
 	NONE = 'N',
 	NORMAL = 'n',
+	PIXEL = 'P',
 	ONE_PIXEL = '1',
 };
 
@@ -159,7 +153,6 @@ struct container_t {
 
 	std::list< std::shared_ptr<container_t> >  nodes;
 };
-#endif
 
 
 /**

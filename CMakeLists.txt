@@ -3,7 +3,6 @@ project(i3ipc++)
 
 option(I3IPCpp_WITH_TESTS "Build unit tests executables" OFF)
 option(I3IPCpp_BUILD_EXAMPLES "Build example executables" OFF)
-option(I3IPCpp_USE_FULL_SIGNALS "Provide full JSON event object with the signals for workspace_event and window_event. !!CHANGES API!!" OFF)
 
 set(BUILD_STATIC_LIBS ON)
 set(BUILD_SHARED_LIBS OFF)
@@ -14,14 +13,7 @@ UNSET(BUILD_SHARED_LIBS)
 find_package(PkgConfig)
 pkg_check_modules(SIGCPP REQUIRED sigc++-2.0)
 
-# configure a header file to pass some settings to the source code
-configure_file (
-  "${PROJECT_SOURCE_DIR}/include/i3ipc++/i3ipc++_config.hpp.in"
-  "${PROJECT_BINARY_DIR}/include/i3ipc++_config.hpp"
-  )
-
 include_directories(
-	${PROJECT_BINARY_DIR}/include
 	${SIGCPP_INCLUDE_DIRS}
 	3rd/jsoncpp/include
 	3rd/auss/include
@@ -49,8 +41,7 @@ set(I3IPCpp_INCLUDE_DIRS
 set(I3IPCpp_LIBRARIES i3ipc++_static ${SIGCPP_LIBRARIES} jsoncpp_lib_static)
 
 set(I3IPCpp_LIBRARY_DIRS ${I3IPCpp_LIBRARY_DIRS} PARENT_SCOPE)
-set(I3IPCpp_INCLUDE_DIRS ${I3IPCpp_INCLUDE_DIRS})
-set(I3IPCpp_INCLUDE_DIRS ${I3IPCpp_INCLUDE_DIRS} ${PROJECT_BINARY_DIR}/include PARENT_SCOPE)
+set(I3IPCpp_INCLUDE_DIRS ${I3IPCpp_INCLUDE_DIRS} PARENT_SCOPE)
 set(I3IPCpp_LIBRARIES ${I3IPCpp_LIBRARIES} PARENT_SCOPE)
 
 if(I3IPCpp_BUILD_EXAMPLES)

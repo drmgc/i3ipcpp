@@ -4,9 +4,7 @@
 #include <iostream>
 
 #include <auss.hpp>
-#ifndef I3IPCpp_USE_FULL_SIGNALS
 #include <json/json.h>
-#endif
 
 #include "log.hpp"
 #include "ipc-util.hpp"
@@ -78,6 +76,8 @@ static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value
 		container->border = BorderStyle::NORMAL;
 	} else if (border == "none") {
 		container->border = BorderStyle::NONE;
+	} else if (border == "pixel") {
+		container->border = BorderStyle::PIXEL;
 	} else if (border == "1pixel") {
 		container->border = BorderStyle::ONE_PIXEL;
 	} else {
@@ -177,6 +177,7 @@ std::string  get_socketpath() {
 	}
 	return str;
 }
+
 
 connection::connection(const std::string&  socket_path) : m_main_socket(i3_connect(socket_path)), m_event_socket(-1), m_subscriptions(0), m_socket_path(socket_path) {
 #define i3IPC_TYPE_STR "i3's event"
