@@ -111,6 +111,7 @@ enum class BorderStyle : char {
 	UNKNOWN = '?', //< If got an unknown border style in reply
 	NONE = 'N',
 	NORMAL = 'n',
+	PIXEL = 'P',
 	ONE_PIXEL = '1',
 };
 

@@ -76,6 +76,8 @@ static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value
 		container->border = BorderStyle::NORMAL;
 	} else if (border == "none") {
 		container->border = BorderStyle::NONE;
+	} else if (border == "pixel") {
+		container->border = BorderStyle::PIXEL;
 	} else if (border == "1pixel") {
 		container->border = BorderStyle::ONE_PIXEL;
 	} else {
