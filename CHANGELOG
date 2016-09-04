@@ -1,3 +1,10 @@
+0.3
+	+ Added support of BINDING event
+
+	~ Removed submodules
+
+	* Bug fixies
+
 0.2.1
 	+ Added example of event handling
 	* Fixed SIGSEGV in parse_*_from_json functions
