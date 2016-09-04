@@ -27,11 +27,11 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 file(GLOB_RECURSE SRC src/*.cpp)
 add_library(i3ipc++_static STATIC ${SRC})
 
-set(I3IPCpp_LIBRARY_DIRS ${CMAKE_CURRENT_BINARY_DIR})
+set(I3IPCpp_LIBRARY_DIRS ${CMAKE_CURRENT_BINARY_DIR} ${SIGCPP_LIBRARY_DIRS})
 set(I3IPCpp_INCLUDE_DIRS
 	${SIGCPP_INCLUDE_DIRS}
-	3rd/auss/include
-	${CMAKE_CURRENT_SOURCE_DIR}/include/
+	${PROJECT_SOURCE_DIR}/3rd/auss/include
+	${PROJECT_SOURCE_DIR}/include/
 )
 set(I3IPCpp_LIBRARIES i3ipc++_static ${SIGCPP_LIBRARIES} ${JSONCPP_LIBRARIES})
 
@@ -40,7 +40,7 @@ set(I3IPCpp_INCLUDE_DIRS ${I3IPCpp_INCLUDE_DIRS} PARENT_SCOPE)
 set(I3IPCpp_LIBRARIES ${I3IPCpp_LIBRARIES} PARENT_SCOPE)
 
 if(I3IPCpp_BUILD_EXAMPLES)
-	add_subdirectory(examples)
+	add_subdirectory(${PROJECT_SOURCE_DIR}/examples)
 endif()
 
 if(I3IPCpp_WITH_TESTS)
@@ -49,7 +49,7 @@ if(I3IPCpp_WITH_TESTS)
 		include_directories(${CXXTEST_INCLUDE_DIR})
 		include_directories(src/)
 		add_definitions(
-			-DTEST_SRC_ROOT="${CMAKE_CURRENT_SOURCE_DIR}/test"
+			-DTEST_SRC_ROOT="${PROJECT_SOURCE_DIR}/test"
 		)
 
 		enable_testing()
