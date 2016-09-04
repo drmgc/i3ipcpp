@@ -470,7 +470,12 @@ bool  connection::send_command(const std::string&  command) const {
 #undef i3IPC_TYPE_STR
 }
 
+int32_t  connection::get_main_socket_fd() { return m_main_socket; }
+
+int32_t  connection::get_event_socket_fd() { return m_event_socket; }
+
 int32_t connection::get_file_descriptor() {
+	I3IPC_WARN("connection::get_file_descriptor() is DEPRECATED")
 	return m_event_socket;
 }
 

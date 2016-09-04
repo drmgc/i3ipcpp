@@ -271,10 +271,21 @@ public:
 	void  handle_event();
 
 	/**
-	 * Get the file descriptor associated to i3.
-	 * @return the file descriptor associated to i3, -1 if not created yet.
+	 * Get the fd of the main socket
+	 * @return the file descriptor of the main socket.
 	 */
-	int32_t get_file_descriptor();
+	int32_t get_main_socket_fd();
+
+	/**
+	 * Get the fd of the event socket
+	 * @return the file descriptor of the event socket.
+	 */
+	int32_t get_event_socket_fd();
+
+	/**
+	 * @deprecated Use get_event_socket() instead
+	 */
+	int32_t  get_file_descriptor();
 
 	sigc::signal<void, const workspace_event_t&>  signal_workspace_event; ///< Workspace event signal
 	sigc::signal<void>  signal_output_event; ///< Output event signal
