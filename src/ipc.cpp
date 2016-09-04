@@ -155,6 +155,39 @@ static std::shared_ptr<output_t>  parse_output_from_json(const Json::Value&  val
 	return p;
 }
 
+static std::shared_ptr<binding_t>  parse_binding_from_json(const Json::Value&  value) {
+#define i3IPC_TYPE_STR "PARSE BINDING FROM JSON"
+	if (value.isNull())
+		return std::shared_ptr<binding_t>();
+	IPC_JSON_ASSERT_TYPE_OBJECT(value, "binding")
+	std::shared_ptr<binding_t>  b (new binding_t());
+
+	b->command = value["command"].asString();
+	b->symbol = value["symbol"].asString();
+	b->input_code = value["input_code"].asInt();
+
+	Json::Value input_type = value["input_type"].asString();
+	if (input_type == "keyboard") {
+		b->input_type = InputType::KEYBOARD;
+	} else if (input_type == "mouse") {
+		b->input_type = InputType::MOUSE;
+	} else {
+		b->input_type = InputType::UNKNOWN;
+	}
+
+	Json::Value  esm_arr = value["event_state_mask"];
+	IPC_JSON_ASSERT_TYPE_ARRAY(esm_arr, "event_state_mask")
+
+	b->event_state_mask.resize(esm_arr.size());
+
+	for (Json::ArrayIndex  i = 0; i < esm_arr.size(); i++) {
+		b->event_state_mask[i] = esm_arr[i].asString();
+	}
+
+	return b;
+#undef i3IPC_TYPE_STR
+}
+
 
 std::string  get_socketpath() {
 	std::string  str;
@@ -259,6 +292,28 @@ connection::connection(const std::string&  socket_path) : m_main_socket(i3_conne
 			I3IPC_DEBUG("BARCONFIG_UPDATE")
 			signal_barconfig_update_event.emit();
 			break;
+		case ET_BINDING: {
+			Json::Value  root;
+			IPC_JSON_READ(root);
+			std::string  change = root["change"].asString();
+			if (change != "run") {
+				I3IPC_WARN("Got \"" << change << "\" in field \"change\" of binding_event. Expected \"run\"")
+			}
+
+			Json::Value  binding_json = root["binding"];
+			std::shared_ptr<binding_t>  bptr;
+			if (!binding_json.isNull()) {
+				bptr = parse_binding_from_json(binding_json);
+			}
+
+			if (!bptr) {
+				I3IPC_ERR("Failed to parse field \"binding\" from binding_event")
+			} else {
+				I3IPC_DEBUG("BINDING " << bptr->symbol);
+				signal_binding_event.emit(*bptr);
+			}
+			break;
+		}
 		};
 	});
 #undef i3IPC_TYPE_STR
@@ -307,6 +362,9 @@ bool  connection::subscribe(const int32_t  events) {
 		}
 		if (events & static_cast<int32_t>(ET_BARCONFIG_UPDATE)) {
 			payload_auss << "\"barconfig_update\",";
+		}
+		if (events & static_cast<int32_t>(ET_BINDING)) {
+			payload_auss << "\"binding\",";
 		}
 		payload = payload_auss;
 		if (payload.empty()) {

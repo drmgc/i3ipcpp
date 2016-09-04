@@ -77,6 +77,7 @@ enum EventType {
 	ET_MODE = (1 << 2), ///< Output mode event
 	ET_WINDOW = (1 << 3), ///< Window event
 	ET_BARCONFIG_UPDATE = (1 << 4), ///< Bar config update event @attention Yet is not implemented as signal in connection
+	ET_BINDING = (1 << 5), ///< Binding event
 };
 
 /**
@@ -131,6 +132,16 @@ enum class ContainerLayout : char {
 
 
 /**
+ * A type of the input of bindings
+ */
+enum class InputType : char {
+	UNKNOWN = '?', //< If got an unknown input_type in binding_event
+	KEYBOARD = 'k',
+	MOUSE = 'm',
+};
+
+
+/**
  * A node of tree of windows
  */
 struct container_t {
@@ -171,6 +182,18 @@ struct workspace_event_t {
 struct window_event_t {
 	WindowEventType  type;
 	std::shared_ptr<container_t>  container; ///< A container event associated with @note With some WindowEventType could be null
+};
+
+
+/**
+ * A binding
+ */
+struct binding_t {
+	std::string  command; ///< The i3 command that is configured to run for this binding
+	std::vector<std::string>  event_state_mask; ///< The group and modifier keys that were configured with this binding
+	int32_t  input_code; ///< If the binding was configured with bindcode, this will be the key code that was given for the binding. If the binding is a mouse binding, it will be the number of the mouse button that was pressed. Otherwise it will be 0
+	std::string  symbol; ///< If this is a keyboard binding that was configured with bindsym, this field will contain the given symbol. Otherwise it will be null
+	InputType  input_type;
 };
 
 
@@ -258,6 +281,7 @@ public:
 	sigc::signal<void>  signal_mode_event; ///< Output mode event signal
 	sigc::signal<void, const window_event_t&>  signal_window_event; ///< Window event signal
 	sigc::signal<void>  signal_barconfig_update_event; ///< Barconfig update event signal
+	sigc::signal<void, const binding_t&>  signal_binding_event; ///< Binding event signal
 	sigc::signal<void, EventType, const std::shared_ptr<const buf_t>&>  signal_event; ///< i3 event signal @note Default handler routes event to signal according to type
 private:
 	const int32_t  m_main_socket;
