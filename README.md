@@ -6,8 +6,10 @@ An implementation of i3 IPC in C++11.
 
 ## Requirements
 
+* cmake (>= 3.0)
 * C++11 compiler
 * sigc++ 2.0
+* jsoncpp
 
 ## Using
 Yet the only way of using is to add this repo as a submodule
@@ -36,7 +38,7 @@ target_link_libraries(someapp ${I3IPCpp_LIBRARIES})
 ```
 
 ## Version i3 support
-It is written according to the *current* specification, so some of new features in IPC can be implemented. If there is some of them, please notice at issues page.
+It is written according to the *current* specification, so some of new features in IPC can be not-implemented. If there is some of them, please notice at issues page.
 
 ## Examples
 There is few examples in `examples/` directory.
@@ -45,4 +47,7 @@ There is few examples in `examples/` directory.
 The latest documentation you can find [**here**](http://drmgc.github.io/docs/api-ref/i3ipc++/latest/)
 
 ## Licensing
-This library is licensed under under the MIT license, but it also uses [`JsonCpp`](https://github.com/open-source-parsers/jsoncpp) (*only for parsing i3's replies*) and my library [`auss`](https://github.com/drmgc/auss)
+This library is licensed under under the MIT license, but it also uses [`JsonCpp`](https://github.com/open-source-parsers/jsoncpp) (*only for parsing i3's replies*) and my header-only library [`auss`](https://github.com/drmgc/auss)
+
+## Backward compatibility note
+While version is `0.x` there can be a lack of backward compatibility between minor releases, please see release notes.
