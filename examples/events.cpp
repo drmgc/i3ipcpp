@@ -25,9 +25,6 @@ int  main() {
 		}
 	});
 
-	// Don't forget this:
-	conn.prepare_to_event_handling();
-
 	while (true) {
 		conn.handle_event();
 	}

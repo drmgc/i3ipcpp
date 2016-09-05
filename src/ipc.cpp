@@ -329,9 +329,10 @@ void  connection::prepare_to_event_handling() {
 	m_event_socket = i3_connect(m_socket_path);
 	this->subscribe(m_subscriptions);
 }
+
 void  connection::handle_event() {
 	if (m_event_socket <= 0) {
-		throw std::runtime_error("event_socket_fd <= 0");
+		this->prepare_to_event_handling();
 	}
 	auto  buf = i3_recv(m_event_socket);
 

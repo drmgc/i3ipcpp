@@ -259,12 +259,6 @@ public:
 	bool  subscribe(const int32_t  events);
 
 	/**
-	 * Prepare connection to the handling of i3's events
-	 * @note Used only in main()
-	 */
-	void  prepare_to_event_handling();
-
-	/**
 	 * Handle an event from i3
 	 * @note Used only in main()
 	 */
@@ -294,6 +288,8 @@ public:
 	sigc::signal<void>  signal_barconfig_update_event; ///< Barconfig update event signal
 	sigc::signal<void, const binding_t&>  signal_binding_event; ///< Binding event signal
 	sigc::signal<void, EventType, const std::shared_ptr<const buf_t>&>  signal_event; ///< i3 event signal @note Default handler routes event to signal according to type
+protected:
+	void  prepare_to_event_handling();
 private:
 	const int32_t  m_main_socket;
 	int32_t  m_event_socket;
