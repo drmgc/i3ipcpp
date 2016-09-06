@@ -5,6 +5,7 @@ extern "C" {
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/socket.h>
+#include <errno.h>
 }
 
 #include <cstring>
@@ -15,6 +16,17 @@ extern "C" {
 #include "ipc-util.hpp"
 
 namespace i3ipc {
+
+static std::string  format_errno(const std::string&  msg = std::string()) {
+	auss_t  a;
+	if (msg.size() > 0)
+		a << msg << ": ";
+	a << "errno " << errno << " (" << strerror(errno) << ')';
+	return a;
+}
+
+errno_error::errno_error() : ipc_error(format_errno()) {}
+errno_error::errno_error(const std::string&  msg) : ipc_error(format_errno(msg)) {}
 
 static const std::string  g_i3_ipc_magic = "i3-ipc";
 
@@ -43,7 +55,7 @@ void  buf_t::realloc_payload_to_header() {
 int32_t  i3_connect(const std::string&  socket_path) {
 	int32_t  sockfd = socket(AF_LOCAL, SOCK_STREAM, 0);
 	if (sockfd == -1) {
-		throw std::runtime_error("Could not create a socket");
+		throw errno_error("Could not create a socket");
 	}
 
 	(void)fcntl(sockfd, F_SETFD, FD_CLOEXEC); // What for?
@@ -53,7 +65,7 @@ int32_t  i3_connect(const std::string&  socket_path) {
 	addr.sun_family = AF_LOCAL;
 	strncpy(addr.sun_path, socket_path.c_str(), sizeof(addr.sun_path) - 1);
 	if (connect(sockfd, (const struct sockaddr*)&addr, sizeof(struct sockaddr_un)) < 0) {
-		throw std::runtime_error("Failed to connect to i3");
+		throw errno_error("Failed to connect to i3");
 	}
 
 	return sockfd;
@@ -94,7 +106,7 @@ ssize_t  swrite(int  fd, const uint8_t*  buf, size_t  count) {
 
 	n = writeall(fd, buf, count);
 	if (n == -1)
-		throw std::runtime_error(auss_t() << "Failed to write " << std::hex << fd);
+		throw errno_error(auss_t() << "Failed to write " << std::hex << fd);
 	else
 		return n;
 }
@@ -113,7 +125,7 @@ std::shared_ptr<buf_t>   i3_recv(const int32_t  sockfd) throw (invalid_header_er
 		while (readed < header_size) {
 			int  n = read(sockfd, header + readed, header_size - readed);
 			if (n == -1) {
-				throw std::runtime_error(auss_t() << "Failed to read header from socket 0x" << std::hex << sockfd);
+				throw errno_error(auss_t() << "Failed to read header from socket 0x" << std::hex << sockfd);
 			}
 			if (n == 0) {
 				throw eof_error("Unexpected EOF while reading header");
@@ -136,7 +148,7 @@ std::shared_ptr<buf_t>   i3_recv(const int32_t  sockfd) throw (invalid_header_er
 			if ((n = read(sockfd, buff->payload + readed, buff->header->size - readed)) == -1) {
 				if (errno == EINTR || errno == EAGAIN)
 					continue;
-				throw std::runtime_error(auss_t() << "Failed to read payload from socket 0x" << std::hex << sockfd);
+				throw errno_error(auss_t() << "Failed to read payload from socket 0x" << std::hex << sockfd);
 			}
 
 			readed += n;

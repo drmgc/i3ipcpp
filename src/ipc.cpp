@@ -196,7 +196,7 @@ std::string  get_socketpath() {
 		FILE*  in;
 		char  buf[512] = {0};
 		if (!(in = popen("i3 --get-socketpath", "r"))) {
-			throw std::runtime_error("Failed to get socket path");
+			throw errno_error("Failed to get socket path");
 		}
 
 		while (fgets(buf, sizeof(buf), in) != nullptr) {
