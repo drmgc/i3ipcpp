@@ -1,8 +1,17 @@
+/**
+ * This program dumps a tree of windows and workspaces to console
+ */
+
 #include <iostream>
 
 #include <i3ipc++/ipc.hpp>
 
 
+/**
+ * Reqursively dump containers of a tree
+ * @param  c      a root container
+ * @param  prefix an alignment
+ */
 void  dump_tree_container(const i3ipc::container_t&  c, std::string&  prefix) {
 	std::cout << prefix << "ID: " << c.id << " (i3's; X11's - " << c.xwindow_id << ")" << std::endl;
 	prefix.push_back('\t');
@@ -28,7 +37,10 @@ void  dump_tree_container(const i3ipc::container_t&  c, std::string&  prefix) {
 
 
 int  main() {
+	// First of all needs to create a connection
 	i3ipc::connection  conn;
+
+	// Then we dump workspaces
 	for (auto&  w : conn.get_workspaces()) {
 		std::cout << '#' << std::hex << w->num << std::dec
 			<< "\n\tName: " << w->name
@@ -43,6 +55,8 @@ int  main() {
 			<< "\n\tOutput: " << w->output
 			<< std::endl;
 	}
+
+	// Then we dump the tree
 	std::string  prefix_buf;
 	dump_tree_container(*conn.get_tree(), prefix_buf);
 
