@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <map>
 
 #include <sigc++/sigc++.h>
 
@@ -142,6 +143,26 @@ enum class InputType : char {
 
 
 /**
+ * A mode of a bar
+ */
+enum class BarMode : char {
+	UNKNOWN = '?',
+	DOCK = 'd', ///< The bar sets the dock window type
+	HIDE = 'h', ///< The bar does not show unless a specific key is pressed
+};
+
+
+/**
+ * A position (of a bar?)
+ */
+enum class Position : char {
+	UNKNOWN = '?',
+	TOP = 't',
+	BOTTOM = 'b',
+};
+
+
+/**
  * A node of tree of windows
  */
 struct container_t {
@@ -197,6 +218,22 @@ struct binding_t {
 };
 
 
+/**
+ * A bar configuration
+ */
+struct bar_config_t {
+	std::string  id; ///< The ID for this bar. Included in case you request multiple configurations and want to differentiate the different replies.
+	BarMode  mode;
+	Position  position;
+	std::string  status_command; ///< Command which will be run to generate a statusline. Each line on stdout of this command will be displayed in the bar. At the moment, no formatting is supported
+	std::string  font; ///< The font to use for text on the bar
+	bool  workspace_buttons; ///< Display workspace buttons or not? Defaults to true.
+	bool  binding_mode_indicator; ///< Display the mode indicator or not? Defaults to true.
+	bool  verbose; ///< Should the bar enable verbose output for debugging? Defaults to false.
+	std::map<std::string, uint32_t>  colors; ///< Contains key/value pairs of colors. Each value is a color code in format 0xRRGGBB
+};
+
+
 struct buf_t;
 /**
  * Connection to the i3
@@ -242,6 +279,19 @@ public:
 	std::shared_ptr<container_t>  get_tree() const;
 
 	/**
+	 * Request a list of names of available barconfigs
+	 * @return A list of names of barconfigs
+	 */
+	std::vector<std::string>  get_bar_configs_list() const;
+
+	/**
+	 * Request a barconfig
+	 * @param  name  name of barconfig
+	 * @return The barconfig
+	 */
+	std::shared_ptr<bar_config_t>  get_bar_config(const std::string&  name) const;
+
+	/**
 	 * Subscribe on an events of i3
 	 * 
 	 * If connection isn't handling events at the moment, event numer will be added to subscription list.
@@ -280,7 +330,7 @@ public:
 	sigc::signal<void>  signal_output_event; ///< Output event signal
 	sigc::signal<void>  signal_mode_event; ///< Output mode event signal
 	sigc::signal<void, const window_event_t&>  signal_window_event; ///< Window event signal
-	sigc::signal<void>  signal_barconfig_update_event; ///< Barconfig update event signal
+	sigc::signal<void, const bar_config_t&>  signal_barconfig_update_event; ///< Barconfig update event signal
 	sigc::signal<void, const binding_t&>  signal_binding_event; ///< Binding event signal
 	sigc::signal<void, EventType, const std::shared_ptr<const buf_t>&>  signal_event; ///< i3 event signal @note Default handler routes event to signal according to type
 protected:

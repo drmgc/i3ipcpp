@@ -189,6 +189,52 @@ static std::shared_ptr<binding_t>  parse_binding_from_json(const Json::Value&  v
 }
 
 
+static std::shared_ptr<bar_config_t>  parse_bar_config_from_json(const Json::Value&  value) {
+#define i3IPC_TYPE_STR "PARSE BAR CONFIG FROM JSON"
+	if (value.isNull())
+		return std::shared_ptr<bar_config_t>();
+	IPC_JSON_ASSERT_TYPE_OBJECT(value, "(root)")
+	std::shared_ptr<bar_config_t>  bc (new bar_config_t());
+
+	bc->id = value["id"].asString();
+	bc->status_command = value["status_command"].asString();
+	bc->font = value["font"].asString();
+	bc->workspace_buttons = value["workspace_buttons"].asBool();
+	bc->binding_mode_indicator = value["binding_mode_indicator"].asBool();
+	bc->verbose = value["verbose"].asBool();
+
+	std::string  mode = value["mode"].asString();
+	if (mode == "dock") {
+		bc->mode = BarMode::DOCK;
+	} else if (mode == "hide") {
+		bc->mode = BarMode::HIDE;
+	} else {
+		bc->mode = BarMode::UNKNOWN;
+		I3IPC_WARN("Got a unknown \"mode\" property: \"" << mode << "\". Perhaps its neccessary to update i3ipc++. If you are using latest, note maintainer about this")
+	}
+
+	std::string  position = value["position"].asString();
+	if (position == "top") {
+		bc->position = Position::TOP;
+	} else if (mode == "bottom") {
+		bc->position = Position::BOTTOM;
+	} else {
+		bc->position = Position::UNKNOWN;
+		I3IPC_WARN("Got a unknown \"position\" property: \"" << position << "\". Perhaps its neccessary to update i3ipc++. If you are using latest, note maintainer about this")
+	}
+
+	Json::Value  colors = value["colors"];
+	IPC_JSON_ASSERT_TYPE_OBJECT(value, "colors")
+	auto  colors_list = colors.getMemberNames();
+	for (auto&  m : colors_list) {
+		bc->colors[m] = std::stoul(colors[m].asString().substr(1), nullptr, 16);
+	}
+
+	return bc;
+#undef i3IPC_TYPE_STR
+}
+
+
 std::string  get_socketpath() {
 	std::string  str;
 	{
@@ -288,10 +334,14 @@ connection::connection(const std::string&  socket_path) : m_main_socket(i3_conne
 			signal_window_event.emit(ev);
 			break;
 		}
-		case ET_BARCONFIG_UPDATE:
+		case ET_BARCONFIG_UPDATE: {
 			I3IPC_DEBUG("BARCONFIG_UPDATE")
-			signal_barconfig_update_event.emit();
+			Json::Value  root;
+			IPC_JSON_READ(root);
+			std::shared_ptr<bar_config_t>  barconf = parse_bar_config_from_json(root);
+			signal_barconfig_update_event.emit(*barconf);
 			break;
+		}
 		case ET_BINDING: {
 			Json::Value  root;
 			IPC_JSON_READ(root);
@@ -446,6 +496,34 @@ std::vector< std::shared_ptr<workspace_t> >  connection::get_workspaces() const 
 	}
 
 	return workspaces;
+#undef i3IPC_TYPE_STR
+}
+
+
+std::vector<std::string>  connection::get_bar_configs_list() const {
+#define i3IPC_TYPE_STR "GET_BAR_CONFIG (get_bar_configs_list)"
+	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_BAR_CONFIG);
+	Json::Value  root;
+	IPC_JSON_READ(root)
+	IPC_JSON_ASSERT_TYPE_ARRAY(root, "root")
+
+	std::vector<std::string>  l;
+
+	for (auto w : root) {
+		l.push_back(w.asString());
+	}
+
+	return l;
+#undef i3IPC_TYPE_STR
+}
+
+
+std::shared_ptr<bar_config_t>  connection::get_bar_config(const std::string&  name) const {
+#define i3IPC_TYPE_STR "GET_BAR_CONFIG"
+	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_BAR_CONFIG, name);
+	Json::Value  root;
+	IPC_JSON_READ(root)
+	return parse_bar_config_from_json(root);
 #undef i3IPC_TYPE_STR
 }
 
