@@ -475,9 +475,4 @@ int32_t  connection::get_main_socket_fd() { return m_main_socket; }
 
 int32_t  connection::get_event_socket_fd() { return m_event_socket; }
 
-int32_t connection::get_file_descriptor() {
-	I3IPC_WARN("connection::get_file_descriptor() is DEPRECATED")
-	return m_event_socket;
-}
-
 }
