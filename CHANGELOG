@@ -1,3 +1,15 @@
+0.4
+	+ Added support of GET_BARCONFIG and barconfig_update event and examples for them
+	+ Added getters form main and event sockets
+	+ Added i3ipc::get_version()
+
+	~ Calling i3ipc::connection::prepare_to_event_handling() is no more necessary
+	~ Using i3ipc::errno_error when calling c-functions instead of std::runtime_error
+	~ Logging-subsystem became public
+	~ Refactoring of CMakeLists.txt
+
+	- i3ipc::connection::get_file_descriptor() removed
+
 0.3
 	+ Added support of BINDING event
 
