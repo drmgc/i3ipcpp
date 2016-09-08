@@ -553,4 +553,19 @@ int32_t  connection::get_main_socket_fd() { return m_main_socket; }
 
 int32_t  connection::get_event_socket_fd() { return m_event_socket; }
 
+
+const version_t&  get_version() {
+#define I3IPC_VERSION_MAJOR  0
+#define I3IPC_VERSION_MINOR  3
+#define I3IPC_VERSION_PATCH  0
+	static version_t  version = {
+		.human_readable = auss_t() << I3IPC_VERSION_MAJOR << '.' << I3IPC_VERSION_MINOR << '.' << I3IPC_VERSION_PATCH  << " (built on " << I3IPC_BUILD_DATETIME << ")",
+		.loaded_config_file_name = std::string(),
+		.major = I3IPC_VERSION_MAJOR,
+		.minor = I3IPC_VERSION_MINOR,
+		.patch = I3IPC_VERSION_PATCH,
+	};
+	return version;
+}
+
 }

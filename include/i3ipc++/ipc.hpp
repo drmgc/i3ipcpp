@@ -342,6 +342,12 @@ private:
 	const std::string  m_socket_path;
 };
 
+/**
+ * Get version of i3ipc++
+ * @return the version of i3ipc++
+ */
+const version_t&  get_version();
+
 }
 
 /**
