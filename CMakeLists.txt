@@ -64,7 +64,7 @@ target_compile_definitions(i3ipc++
 	PRIVATE I3IPC_BUILD_DATETIME="${I3IPCppBUILD_DATETIME}"
 )
 
-if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+if (CMAKE_BUILD_TYPE STREQUAL "DEBUG")
 	target_compile_options(i3ipc++
 		PUBLIC -g3
 	)
