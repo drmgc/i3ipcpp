@@ -219,6 +219,15 @@ struct binding_t {
 
 
 /**
+ * A mode
+ */
+struct mode_t {
+	std::string  change; ///< The current mode in use
+	bool pango_markup; ///< Should pango markup be used for displaying this mode
+};
+
+
+/**
  * A bar configuration
  */
 struct bar_config_t {
@@ -340,7 +349,7 @@ public:
 
 	sigc::signal<void, const workspace_event_t&>  signal_workspace_event; ///< Workspace event signal
 	sigc::signal<void>  signal_output_event; ///< Output event signal
-	sigc::signal<void>  signal_mode_event; ///< Output mode event signal
+	sigc::signal<void, const mode_t&>  signal_mode_event; ///< Output mode event signal
 	sigc::signal<void, const window_event_t&>  signal_window_event; ///< Window event signal
 	sigc::signal<void, const bar_config_t&>  signal_barconfig_update_event; ///< Barconfig update event signal
 	sigc::signal<void, const binding_t&>  signal_binding_event; ///< Binding event signal

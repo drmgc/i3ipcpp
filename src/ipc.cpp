@@ -188,6 +188,18 @@ static std::shared_ptr<binding_t>  parse_binding_from_json(const Json::Value&  v
 #undef i3IPC_TYPE_STR
 }
 
+static std::shared_ptr<mode_t>  parse_mode_from_json(const Json::Value&  value) {
+	if (value.isNull())
+		return std::shared_ptr<mode_t>();
+	Json::Value  change = value["change"];
+	Json::Value  pango_markup = value["pango_markup"];
+
+	std::shared_ptr<mode_t>  p (new mode_t());
+	p->change = change.asString();
+	p->pango_markup = pango_markup.asBool();
+	return p;
+}
+
 
 static std::shared_ptr<bar_config_t>  parse_bar_config_from_json(const Json::Value&  value) {
 #define i3IPC_TYPE_STR "PARSE BAR CONFIG FROM JSON"
@@ -298,10 +310,14 @@ connection::connection(const std::string&  socket_path) : m_main_socket(i3_conne
 			I3IPC_DEBUG("OUTPUT")
 			signal_output_event.emit();
 			break;
-		case ET_MODE:
+		case ET_MODE: {
 			I3IPC_DEBUG("MODE")
-			signal_mode_event.emit();
+			Json::Value  root;
+			IPC_JSON_READ(root);
+			std::shared_ptr<mode_t>  mode_data = parse_mode_from_json(root);
+			signal_mode_event.emit(*mode_data);
 			break;
+		}
 		case ET_WINDOW: {
 			window_event_t  ev;
 			Json::Value  root;
