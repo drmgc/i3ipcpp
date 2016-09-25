@@ -326,6 +326,18 @@ public:
 	 */
 	int32_t get_event_socket_fd();
 
+	/**
+	 * Connect the event socket to IPC
+	 * @param  reconnect if true the event socket will be disconnected and connected again
+	 * @note Automaticly called, when calling handle_event();
+	 */
+	void  connect_event_socket(const bool  reconnect = false);
+
+	/**
+	 * Disconnect the event socket
+	 */
+	void  disconnect_event_socket();
+
 	sigc::signal<void, const workspace_event_t&>  signal_workspace_event; ///< Workspace event signal
 	sigc::signal<void>  signal_output_event; ///< Output event signal
 	sigc::signal<void>  signal_mode_event; ///< Output mode event signal
@@ -333,8 +345,6 @@ public:
 	sigc::signal<void, const bar_config_t&>  signal_barconfig_update_event; ///< Barconfig update event signal
 	sigc::signal<void, const binding_t&>  signal_binding_event; ///< Binding event signal
 	sigc::signal<void, EventType, const std::shared_ptr<const buf_t>&>  signal_event; ///< i3 event signal @note Default handler routes event to signal according to type
-protected:
-	void  prepare_to_event_handling();
 private:
 	const int32_t  m_main_socket;
 	int32_t  m_event_socket;

@@ -371,18 +371,36 @@ connection::connection(const std::string&  socket_path) : m_main_socket(i3_conne
 connection::~connection() {
 	i3_disconnect(m_main_socket);
 	if (m_event_socket > 0)
-		i3_disconnect(m_event_socket);
+		this->disconnect_event_socket();
 }
 
 
-void  connection::prepare_to_event_handling() {
+void  connection::connect_event_socket(const bool  reconnect) {
+	if (m_event_socket > 0) {
+		if (reconnect) {
+			this->disconnect_event_socket();
+		} else {
+			I3IPC_ERR("Trying to initialize event socket secondary")
+			return;
+		}
+	}
 	m_event_socket = i3_connect(m_socket_path);
 	this->subscribe(m_subscriptions);
 }
 
+
+void  connection::disconnect_event_socket() {
+	if (m_event_socket <= 0) {
+		I3IPC_WARN("Trying to disconnect non-connected event socket")
+		return;
+	}
+	i3_disconnect(m_event_socket);
+}
+
+
 void  connection::handle_event() {
 	if (m_event_socket <= 0) {
-		this->prepare_to_event_handling();
+		this->connect_event_socket();
 	}
 	auto  buf = i3_recv(m_event_socket);
 
