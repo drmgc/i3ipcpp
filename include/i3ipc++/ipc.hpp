@@ -89,6 +89,9 @@ enum class WorkspaceEventType : char {
 	INIT = 'i', ///< Initialized
 	EMPTY = 'e', ///< Became empty
 	URGENT = 'u', ///< Became urgent
+    RENAME = 'r', ///< Renamed
+    RELOAD = 'l', ///< Reloaded
+    RESTORED = 's', ///< Restored
 };
 
 /**
