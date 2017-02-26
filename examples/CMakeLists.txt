@@ -18,3 +18,6 @@ target_link_libraries(workspaces ${I3IPCpp_LIBRARIES})
 
 add_executable(events events.cpp)
 target_link_libraries(events ${I3IPCpp_LIBRARIES})
+
+add_executable(bar-configs bar-configs.cpp)
+target_link_libraries(bar-configs ${I3IPCpp_LIBRARIES})

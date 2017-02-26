@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <map>
 
 #include <sigc++/sigc++.h>
 
@@ -77,6 +78,7 @@ enum EventType {
 	ET_MODE = (1 << 2), ///< Output mode event
 	ET_WINDOW = (1 << 3), ///< Window event
 	ET_BARCONFIG_UPDATE = (1 << 4), ///< Bar config update event @attention Yet is not implemented as signal in connection
+	ET_BINDING = (1 << 5), ///< Binding event
 };
 
 /**
@@ -87,6 +89,9 @@ enum class WorkspaceEventType : char {
 	INIT = 'i', ///< Initialized
 	EMPTY = 'e', ///< Became empty
 	URGENT = 'u', ///< Became urgent
+	RENAME = 'r', ///< Renamed
+	RELOAD = 'l', ///< Reloaded
+	RESTORED = 's', ///< Restored
 };
 
 /**
@@ -131,6 +136,36 @@ enum class ContainerLayout : char {
 
 
 /**
+ * A type of the input of bindings
+ */
+enum class InputType : char {
+	UNKNOWN = '?', //< If got an unknown input_type in binding_event
+	KEYBOARD = 'k',
+	MOUSE = 'm',
+};
+
+
+/**
+ * A mode of a bar
+ */
+enum class BarMode : char {
+	UNKNOWN = '?',
+	DOCK = 'd', ///< The bar sets the dock window type
+	HIDE = 'h', ///< The bar does not show unless a specific key is pressed
+};
+
+
+/**
+ * A position (of a bar?)
+ */
+enum class Position : char {
+	UNKNOWN = '?',
+	TOP = 't',
+	BOTTOM = 'b',
+};
+
+
+/**
  * A node of tree of windows
  */
 struct container_t {
@@ -171,6 +206,43 @@ struct workspace_event_t {
 struct window_event_t {
 	WindowEventType  type;
 	std::shared_ptr<container_t>  container; ///< A container event associated with @note With some WindowEventType could be null
+};
+
+
+/**
+ * A binding
+ */
+struct binding_t {
+	std::string  command; ///< The i3 command that is configured to run for this binding
+	std::vector<std::string>  event_state_mask; ///< The group and modifier keys that were configured with this binding
+	int32_t  input_code; ///< If the binding was configured with bindcode, this will be the key code that was given for the binding. If the binding is a mouse binding, it will be the number of the mouse button that was pressed. Otherwise it will be 0
+	std::string  symbol; ///< If this is a keyboard binding that was configured with bindsym, this field will contain the given symbol. Otherwise it will be null
+	InputType  input_type;
+};
+
+
+/**
+ * A mode
+ */
+struct mode_t {
+	std::string  change; ///< The current mode in use
+	bool pango_markup; ///< Should pango markup be used for displaying this mode
+};
+
+
+/**
+ * A bar configuration
+ */
+struct bar_config_t {
+	std::string  id; ///< The ID for this bar. Included in case you request multiple configurations and want to differentiate the different replies.
+	BarMode  mode;
+	Position  position;
+	std::string  status_command; ///< Command which will be run to generate a statusline. Each line on stdout of this command will be displayed in the bar. At the moment, no formatting is supported
+	std::string  font; ///< The font to use for text on the bar
+	bool  workspace_buttons; ///< Display workspace buttons or not? Defaults to true.
+	bool  binding_mode_indicator; ///< Display the mode indicator or not? Defaults to true.
+	bool  verbose; ///< Should the bar enable verbose output for debugging? Defaults to false.
+	std::map<std::string, uint32_t>  colors; ///< Contains key/value pairs of colors. Each value is a color code in format 0xRRGGBB
 };
 
 
@@ -219,6 +291,19 @@ public:
 	std::shared_ptr<container_t>  get_tree() const;
 
 	/**
+	 * Request a list of names of available barconfigs
+	 * @return A list of names of barconfigs
+	 */
+	std::vector<std::string>  get_bar_configs_list() const;
+
+	/**
+	 * Request a barconfig
+	 * @param  name  name of barconfig
+	 * @return The barconfig
+	 */
+	std::shared_ptr<bar_config_t>  get_bar_config(const std::string&  name) const;
+
+	/**
 	 * Subscribe on an events of i3
 	 * 
 	 * If connection isn't handling events at the moment, event numer will be added to subscription list.
@@ -236,28 +321,41 @@ public:
 	bool  subscribe(const int32_t  events);
 
 	/**
-	 * Prepare connection to the handling of i3's events
-	 * @note Used only in main()
-	 */
-	void  prepare_to_event_handling();
-
-	/**
 	 * Handle an event from i3
 	 * @note Used only in main()
 	 */
 	void  handle_event();
 
 	/**
-	 * Get the file descriptor associated to i3.
-	 * @return the file descriptor associated to i3, -1 if not created yet.
+	 * Get the fd of the main socket
+	 * @return the file descriptor of the main socket.
 	 */
-	int32_t get_file_descriptor();
+	int32_t get_main_socket_fd();
+
+	/**
+	 * Get the fd of the event socket
+	 * @return the file descriptor of the event socket.
+	 */
+	int32_t get_event_socket_fd();
+
+	/**
+	 * Connect the event socket to IPC
+	 * @param  reconnect if true the event socket will be disconnected and connected again
+	 * @note Automaticly called, when calling handle_event();
+	 */
+	void  connect_event_socket(const bool  reconnect = false);
+
+	/**
+	 * Disconnect the event socket
+	 */
+	void  disconnect_event_socket();
 
 	sigc::signal<void, const workspace_event_t&>  signal_workspace_event; ///< Workspace event signal
 	sigc::signal<void>  signal_output_event; ///< Output event signal
-	sigc::signal<void>  signal_mode_event; ///< Output mode event signal
+	sigc::signal<void, const mode_t&>  signal_mode_event; ///< Output mode event signal
 	sigc::signal<void, const window_event_t&>  signal_window_event; ///< Window event signal
-	sigc::signal<void>  signal_barconfig_update_event; ///< Barconfig update event signal
+	sigc::signal<void, const bar_config_t&>  signal_barconfig_update_event; ///< Barconfig update event signal
+	sigc::signal<void, const binding_t&>  signal_binding_event; ///< Binding event signal
 	sigc::signal<void, EventType, const std::shared_ptr<const buf_t>&>  signal_event; ///< i3 event signal @note Default handler routes event to signal according to type
 private:
 	const int32_t  m_main_socket;
@@ -265,6 +363,12 @@ private:
 	int32_t  m_subscriptions;
 	const std::string  m_socket_path;
 };
+
+/**
+ * Get version of i3ipc++
+ * @return the version of i3ipc++
+ */
+const version_t&  get_version();
 
 }
 

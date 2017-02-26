@@ -49,6 +49,15 @@ class eof_error : public ipc_error { using ipc_error::ipc_error; };
  */
 class invalid_reply_payload_error : public ipc_error { using ipc_error::ipc_error; };
 
+/**
+ * @brief If any error occured, while using C-functions
+ */
+class errno_error : public ipc_error {
+public:
+	errno_error();
+	errno_error(const std::string&  msg);
+};
+
 
 /**
  * @brief Messages (requests), that can be sended from the client
