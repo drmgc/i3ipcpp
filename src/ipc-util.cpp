@@ -115,7 +115,7 @@ void   i3_send(const int32_t  sockfd, const buf_t&  buff) {
 	swrite(sockfd, buff.data, buff.size);
 }
 
-std::shared_ptr<buf_t>   i3_recv(const int32_t  sockfd) throw (invalid_header_error, eof_error) {
+std::shared_ptr<buf_t>   i3_recv(const int32_t  sockfd) {
 	buf_t*  buff = new buf_t(0);
 	const uint32_t  header_size = sizeof(header_t);
 
@@ -159,7 +159,7 @@ std::shared_ptr<buf_t>   i3_recv(const int32_t  sockfd) throw (invalid_header_er
 }
 
 
-std::shared_ptr<buf_t>  i3_msg(const int32_t  sockfd, const ClientMessageType  type, const std::string&  payload) throw (invalid_header_error, eof_error) {
+std::shared_ptr<buf_t>  i3_msg(const int32_t  sockfd, const ClientMessageType  type, const std::string&  payload) {
 	auto  send_buff = i3_pack(type, payload);
 	i3_send(sockfd, *send_buff);
 	auto  recv_buff = i3_recv(sockfd);
