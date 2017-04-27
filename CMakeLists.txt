@@ -57,7 +57,7 @@ target_link_libraries(i3ipc++
 )
 
 target_compile_options(i3ipc++
-	PUBLIC -std=c++11 -Wall -Wextra -Wno-unused-parameter
+	PRIVATE -std=c++11 -Wall -Wextra -Wno-unused-parameter
 )
 
 target_compile_definitions(i3ipc++
