@@ -144,7 +144,7 @@ void   i3_send(const int32_t  sockfd, const buf_t&  buff);
  * @param  sockfd  a socket
  * @return  a buffer of the message
  */
-std::shared_ptr<buf_t>   i3_recv(const int32_t  sockfd) throw (invalid_header_error, eof_error);
+std::shared_ptr<buf_t>   i3_recv(const int32_t  sockfd);
 
 /**
  * @brief Pack a buffer of message
@@ -160,7 +160,7 @@ std::shared_ptr<buf_t>  i3_pack(const ClientMessageType  type, const std::string
  * auto  reply = i3_recv(sockfd);
  * @endcode
  */
-std::shared_ptr<buf_t>  i3_msg(const int32_t  sockfd, const ClientMessageType  type, const std::string&  payload = std::string()) throw (invalid_header_error, eof_error);
+std::shared_ptr<buf_t>  i3_msg(const int32_t  sockfd, const ClientMessageType  type, const std::string&  payload = std::string());
 
 /**
  * @}
