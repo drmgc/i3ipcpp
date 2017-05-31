@@ -41,12 +41,14 @@ std::vector<std::ostream*>  g_logging_err_outs = {
 
 
 inline rect_t  parse_rect_from_json(const Json::Value&  value) {
-	return {
-		.x = value["x"].asInt(),
-		.y = value["y"].asInt(),
-		.width = value["width"].asInt(),
-		.height = value["height"].asInt(),
-	};
+	rect_t rect;
+
+	rect.x = value["x"].asInt();
+	rect.y = value["y"].asInt();
+	rect.width = value["width"].asInt();
+	rect.height = value["height"].asInt();
+
+	return rect;
 }
 
 
@@ -477,13 +479,15 @@ version_t  connection::get_version() const {
 	IPC_JSON_READ(root)
 	IPC_JSON_ASSERT_TYPE_OBJECT(root, "root")
 
-	return {
-		.human_readable = root["human_readable"].asString(),
-		.loaded_config_file_name = root["loaded_config_file_name"].asString(),
-		.major = root["major"].asUInt(),
-		.minor = root["minor"].asUInt(),
-		.patch = root["patch"].asUInt(),
-	};
+	version_t version;
+
+	version.human_readable = root["human_readable"].asString();
+	version.loaded_config_file_name = root["loaded_config_file_name"].asString();
+	version.major = root["major"].asUInt();
+	version.minor = root["minor"].asUInt();
+	version.patch = root["patch"].asUInt();
+
+	return version;
 #undef i3IPC_TYPE_STR
 }
 
@@ -592,13 +596,14 @@ const version_t&  get_version() {
 #define I3IPC_VERSION_MAJOR  0
 #define I3IPC_VERSION_MINOR  4
 #define I3IPC_VERSION_PATCH  0
-	static version_t  version = {
-		.human_readable = auss_t() << I3IPC_VERSION_MAJOR << '.' << I3IPC_VERSION_MINOR << '.' << I3IPC_VERSION_PATCH  << " (built on " << I3IPC_BUILD_DATETIME << ")",
-		.loaded_config_file_name = std::string(),
-		.major = I3IPC_VERSION_MAJOR,
-		.minor = I3IPC_VERSION_MINOR,
-		.patch = I3IPC_VERSION_PATCH,
-	};
+	static version_t version;
+
+	version.human_readable = auss_t() << I3IPC_VERSION_MAJOR << '.' << I3IPC_VERSION_MINOR << '.' << I3IPC_VERSION_PATCH  << " (built on " << I3IPC_BUILD_DATETIME << ")";
+	version.loaded_config_file_name = std::string();
+	version.major = I3IPC_VERSION_MAJOR;
+	version.minor = I3IPC_VERSION_MINOR;
+	version.patch = I3IPC_VERSION_PATCH;
+
 	return version;
 }
 
