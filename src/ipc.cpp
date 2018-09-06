@@ -228,7 +228,7 @@ static std::shared_ptr<bar_config_t>  parse_bar_config_from_json(const Json::Val
 	std::string  position = value["position"].asString();
 	if (position == "top") {
 		bc->position = Position::TOP;
-	} else if (mode == "bottom") {
+	} else if (position == "bottom") {
 		bc->position = Position::BOTTOM;
 	} else {
 		bc->position = Position::UNKNOWN;
