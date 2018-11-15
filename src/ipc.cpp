@@ -49,6 +49,29 @@ inline rect_t  parse_rect_from_json(const Json::Value&  value) {
 	};
 }
 
+window_properties_t  parse_window_props_from_json(const Json::Value&  value) {
+	if (value.isNull()) {
+		window_properties_t result;
+		result.transient_for = 0ull;
+		return result;
+	}
+
+	window_properties_t result {
+		value["class"].asString(),
+		value["instance"].asString(),
+		value["window_role"].asString(),
+		value["title"].asString(),
+		0ull
+	};
+
+	const Json::Value transient_for = value["transient_for"];
+	if (!transient_for.isNull()) {
+		result.transient_for = transient_for.asUInt64();
+	}
+
+	return result;
+}
+
 
 static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value&  o) {
 #define i3IPC_TYPE_STR "PARSE CONTAINER FROM JSON"
@@ -112,6 +135,8 @@ static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value
 			container->nodes.push_back(parse_container_from_json(nodes[i]));
 		}
 	}
+
+	container->window_properties = parse_window_props_from_json(o["window_properties"]);
 
 	return container;
 #undef i3IPC_TYPE_STR
