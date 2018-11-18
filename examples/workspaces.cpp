@@ -17,6 +17,7 @@ void  dump_tree_container(const i3ipc::container_t&  c, std::string&  prefix) {
 	prefix.push_back('\t');
 	std::cout << prefix << "name = \"" << c.name << "\"" << std::endl;
 	std::cout << prefix << "type = \"" << c.type << "\"" << std::endl;
+	std::cout << prefix << "class = \"" << c.window_properties.xclass << "\"" << std::endl;
 	std::cout << prefix << "border = \"" << c.border_raw << "\"" << std::endl;
 	std::cout << prefix << "current_border_width = " << c.current_border_width << std::endl;
 	std::cout << prefix << "layout = \"" << c.layout_raw << "\"" << std::endl;

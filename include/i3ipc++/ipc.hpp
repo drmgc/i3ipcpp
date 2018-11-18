@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <list>
 #include <string>
 #include <memory>
 #include <vector>
@@ -166,6 +167,17 @@ enum class Position : char {
 
 
 /**
+ * X11 window properties
+ */
+struct window_properties_t {
+	std::string  xclass; /// X11 Window class (WM_CLASS class)
+	std::string  instance; ///X11 Window class instance (WM_CLASS instance)
+	std::string  window_role; /// X11 Window role (WM_WINDOW_ROLE)
+	std::string  title; /// X11 UTF8 window title (_NET_WM_NAME)
+	uint64_t  transient_for; /// Logical top-level window. Nonzero value is an X11 window ID of the parent window (WM_TRANSIENT_FOR)
+};
+
+/**
  * A node of tree of windows
  */
 struct container_t {
@@ -185,6 +197,8 @@ struct container_t {
 	rect_t  geometry; ///< The original geometry the window specified when i3 mapped it. Used when switching a window to floating mode, for example
 	bool  urgent;
 	bool  focused;
+
+	window_properties_t  window_properties; /// X11 window properties
 
 	std::list< std::shared_ptr<container_t> >  nodes;
 };
