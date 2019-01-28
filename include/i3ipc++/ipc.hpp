@@ -54,6 +54,7 @@ struct workspace_t {
 struct output_t {
 	std::string  name; ///< Name of the output
 	bool  active; ///< Is the output currently active
+	bool  primary; ///< Is the output the primary output
 	std::string  current_workspace; ///< Name of current workspace
 	rect_t  rect; ///< Size of the output
 };
