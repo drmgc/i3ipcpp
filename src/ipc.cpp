@@ -169,12 +169,14 @@ static std::shared_ptr<output_t>  parse_output_from_json(const Json::Value&  val
 		return std::shared_ptr<output_t>();
 	Json::Value  name = value["name"];
 	Json::Value  active = value["active"];
+	Json::Value  primary = value["primary"];
 	Json::Value  current_workspace = value["current_workspace"];
 	Json::Value  rect = value["rect"];
 
 	std::shared_ptr<output_t>  p (new output_t());
 	p->name = name.asString();
 	p->active = active.asBool();
+	p->primary = primary.asBool();
 	p->current_workspace = (current_workspace.isNull() ? std::string() : current_workspace.asString());
 	p->rect = parse_rect_from_json(rect);
 	return p;
