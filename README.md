@@ -116,6 +116,11 @@ if (!conn.send_command("exit")) {
 }
 ```
 
+Quoted strings can be passed like this:
+```c++
+conn.send_command("[workspace=\" 1 \""] move workspace to output eDP-1");
+```
+
 ## Version i3 support
 It is written according to the *current* specification, so some of new features in IPC can be not-implemented. If there is some of them, please notice at issues page.
 
