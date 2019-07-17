@@ -1,3 +1,14 @@
+0.5
+	+ Added the "primary" field for output. [notfound404]
+	+ Added window_properties processing [BigRedEye]
+	+ Added support for undocumented WorkspaceEventTypes [Tobias Hänel]
+	+ Added payload to mode event [notfound4]
+	+ Added more control on event socket to user
+	+ Added example for i3 command w/ escaped substring. [Ken Gilmer]
+
+	~ Removed dynamic exception specifications [Morris Hafner]
+
+	* Fixies
 0.4
 	+ Added support of GET_BARCONFIG and barconfig_update event and examples for them
 	+ Added getters form main and event sockets
