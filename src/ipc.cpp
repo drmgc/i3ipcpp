@@ -136,6 +136,14 @@ static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value
 		}
 	}
 
+	Json::Value  floating_nodes = o["floating_nodes"];
+	if (!floating_nodes.isNull()) {
+		IPC_JSON_ASSERT_TYPE_ARRAY(floating_nodes, "floating_nodes")
+		for (Json::ArrayIndex  i = 0; i < floating_nodes.size(); i++) {
+			container->floating_nodes.push_back(parse_container_from_json(floating_nodes[i]));
+		}
+	}
+
 	container->window_properties = parse_window_props_from_json(o["window_properties"]);
 
 	return container;
