@@ -202,6 +202,7 @@ struct container_t {
 	window_properties_t  window_properties; /// X11 window properties
 
 	std::list< std::shared_ptr<container_t> >  nodes;
+	std::list< std::shared_ptr<container_t> >  floating_nodes;
 };
 
 
