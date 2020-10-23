@@ -283,25 +283,7 @@ static std::shared_ptr<bar_config_t>  parse_bar_config_from_json(const Json::Val
 
 
 std::string  get_socketpath() {
-	std::string  str;
-	{
-		auss_t  str_buf;
-		FILE*  in;
-		char  buf[512] = {0};
-		if (!(in = popen("i3 --get-socketpath", "r"))) {
-			throw errno_error("Failed to get socket path");
-		}
-
-		while (fgets(buf, sizeof(buf), in) != nullptr) {
-			str_buf << buf;
-		}
-		pclose(in);
-		str = str_buf;
-	}
-	if (str.back() == '\n') {
-		str.pop_back();
-	}
-	return str;
+	return std::getenv("I3SOCK");
 }
 
 
