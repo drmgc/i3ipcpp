@@ -2,6 +2,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <iostream>
+#include <memory>
 
 #include <auss.hpp>
 #include <json/json.h>
@@ -22,9 +23,11 @@ std::vector<std::ostream*>  g_logging_err_outs = {
 
 #define IPC_JSON_READ(ROOT) \
 	{ \
-		Json::Reader  reader; \
-		if (!reader.parse(std::string(buf->payload, buf->header->size), ROOT, false)) { \
-			throw invalid_reply_payload_error(auss_t() << "Failed to parse reply on \"" i3IPC_TYPE_STR "\": " << reader.getFormattedErrorMessages()); \
+		Json::CharReaderBuilder builder; \
+		std::unique_ptr<Json::CharReader>  reader{builder.newCharReader()}; \
+		std::string error;\
+		if (!reader->parse(buf->payload, buf->payload + buf->header->size, &ROOT, &error)) { \
+			throw invalid_reply_payload_error(auss_t() << "Failed to parse reply on \"" i3IPC_TYPE_STR "\": " << error); \
 		} \
 	}
 
