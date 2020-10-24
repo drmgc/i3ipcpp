@@ -21,19 +21,22 @@ std::vector<std::ostream*>  g_logging_err_outs = {
 };
 
 #define IPC_JSON_READ(ROOT) \
+	do \
 	{ \
 		Json::Reader  reader; \
 		if (!reader.parse(std::string(buf->payload, buf->header->size), ROOT, false)) { \
 			throw invalid_reply_payload_error(auss_t() << "Failed to parse reply on \"" i3IPC_TYPE_STR "\": " << reader.getFormattedErrorMessages()); \
 		} \
-	}
+	} while (0)
 
 #define IPC_JSON_ASSERT_TYPE(OBJ, OBJ_DESCR, TYPE_CHECK, TYPE_NAME) \
+	do \
 	{\
 		if (!(OBJ).TYPE_CHECK()) { \
 			throw invalid_reply_payload_error(auss_t() << "Failed to parse reply on \"" i3IPC_TYPE_STR "\": " OBJ_DESCR " expected to be " TYPE_NAME); \
 		} \
-	}
+	} while (0)
+
 #define IPC_JSON_ASSERT_TYPE_OBJECT(OBJ, OBJ_DESCR) IPC_JSON_ASSERT_TYPE(OBJ, OBJ_DESCR, isObject, "an object")
 #define IPC_JSON_ASSERT_TYPE_ARRAY(OBJ, OBJ_DESCR) IPC_JSON_ASSERT_TYPE(OBJ, OBJ_DESCR, isArray, "an array")
 #define IPC_JSON_ASSERT_TYPE_BOOL(OBJ, OBJ_DESCR) IPC_JSON_ASSERT_TYPE(OBJ, OBJ_DESCR, isBool, "a bool")
@@ -78,7 +81,7 @@ static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value
 	if (o.isNull())
 		return std::shared_ptr<container_t>();
 	std::shared_ptr<container_t>  container (new container_t());
-	IPC_JSON_ASSERT_TYPE_OBJECT(o, "o")
+	IPC_JSON_ASSERT_TYPE_OBJECT(o, "o");
 
 	container->id = o["id"].asUInt64();
 	container->xwindow_id= o["window"].asUInt64();
@@ -130,7 +133,7 @@ static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value
 
 	Json::Value  nodes = o["nodes"];
 	if (!nodes.isNull()) {
-		IPC_JSON_ASSERT_TYPE_ARRAY(nodes, "nodes")
+		IPC_JSON_ASSERT_TYPE_ARRAY(nodes, "nodes");
 		for (Json::ArrayIndex  i = 0; i < nodes.size(); i++) {
 			container->nodes.push_back(parse_container_from_json(nodes[i]));
 		}
@@ -138,7 +141,7 @@ static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value
 
 	Json::Value  floating_nodes = o["floating_nodes"];
 	if (!floating_nodes.isNull()) {
-		IPC_JSON_ASSERT_TYPE_ARRAY(floating_nodes, "floating_nodes")
+		IPC_JSON_ASSERT_TYPE_ARRAY(floating_nodes, "floating_nodes");
 		for (Json::ArrayIndex  i = 0; i < floating_nodes.size(); i++) {
 			container->floating_nodes.push_back(parse_container_from_json(floating_nodes[i]));
 		}
@@ -194,7 +197,7 @@ static std::shared_ptr<binding_t>  parse_binding_from_json(const Json::Value&  v
 #define i3IPC_TYPE_STR "PARSE BINDING FROM JSON"
 	if (value.isNull())
 		return std::shared_ptr<binding_t>();
-	IPC_JSON_ASSERT_TYPE_OBJECT(value, "binding")
+	IPC_JSON_ASSERT_TYPE_OBJECT(value, "binding");
 	std::shared_ptr<binding_t>  b (new binding_t());
 
 	b->command = value["command"].asString();
@@ -211,7 +214,7 @@ static std::shared_ptr<binding_t>  parse_binding_from_json(const Json::Value&  v
 	}
 
 	Json::Value  esm_arr = value["event_state_mask"];
-	IPC_JSON_ASSERT_TYPE_ARRAY(esm_arr, "event_state_mask")
+	IPC_JSON_ASSERT_TYPE_ARRAY(esm_arr, "event_state_mask");
 
 	b->event_state_mask.resize(esm_arr.size());
 
@@ -240,7 +243,7 @@ static std::shared_ptr<bar_config_t>  parse_bar_config_from_json(const Json::Val
 #define i3IPC_TYPE_STR "PARSE BAR CONFIG FROM JSON"
 	if (value.isNull())
 		return std::shared_ptr<bar_config_t>();
-	IPC_JSON_ASSERT_TYPE_OBJECT(value, "(root)")
+	IPC_JSON_ASSERT_TYPE_OBJECT(value, "(root)");
 	std::shared_ptr<bar_config_t>  bc (new bar_config_t());
 
 	bc->id = value["id"].asString();
@@ -271,7 +274,7 @@ static std::shared_ptr<bar_config_t>  parse_bar_config_from_json(const Json::Val
 	}
 
 	Json::Value  colors = value["colors"];
-	IPC_JSON_ASSERT_TYPE_OBJECT(value, "colors")
+	IPC_JSON_ASSERT_TYPE_OBJECT(value, "colors");
 	auto  colors_list = colors.getMemberNames();
 	for (auto&  m : colors_list) {
 		bc->colors[m] = std::stoul(colors[m].asString().substr(1), nullptr, 16);
@@ -502,7 +505,7 @@ bool  connection::subscribe(const int32_t  events) {
 
 	auto  buf = i3_msg(m_event_socket, ClientMessageType::SUBSCRIBE, auss_t() << '[' << payload << ']');
 	Json::Value  root;
-	IPC_JSON_READ(root)
+	IPC_JSON_READ(root);
 
 	m_subscriptions |= events;
 
@@ -515,8 +518,8 @@ version_t  connection::get_version() const {
 #define i3IPC_TYPE_STR "GET_VERSION"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_VERSION);
 	Json::Value  root;
-	IPC_JSON_READ(root)
-	IPC_JSON_ASSERT_TYPE_OBJECT(root, "root")
+	IPC_JSON_READ(root);
+	IPC_JSON_ASSERT_TYPE_OBJECT(root, "root");
 
 	return {
 		.human_readable = root["human_readable"].asString(),
@@ -543,8 +546,8 @@ std::vector< std::shared_ptr<output_t> >  connection::get_outputs() const {
 #define i3IPC_TYPE_STR "GET_OUTPUTS"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_OUTPUTS);
 	Json::Value  root;
-	IPC_JSON_READ(root)
-	IPC_JSON_ASSERT_TYPE_ARRAY(root, "root")
+	IPC_JSON_READ(root);
+	IPC_JSON_ASSERT_TYPE_ARRAY(root, "root");
 
 	std::vector< std::shared_ptr<output_t> >  outputs;
 
@@ -561,8 +564,8 @@ std::vector< std::shared_ptr<workspace_t> >  connection::get_workspaces() const 
 #define i3IPC_TYPE_STR "GET_WORKSPACES"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_WORKSPACES);
 	Json::Value  root;
-	IPC_JSON_READ(root)
-	IPC_JSON_ASSERT_TYPE_ARRAY(root, "root")
+	IPC_JSON_READ(root);
+	IPC_JSON_ASSERT_TYPE_ARRAY(root, "root");
 
 	std::vector< std::shared_ptr<workspace_t> >  workspaces;
 
@@ -579,8 +582,8 @@ std::vector<std::string>  connection::get_bar_configs_list() const {
 #define i3IPC_TYPE_STR "GET_BAR_CONFIG (get_bar_configs_list)"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_BAR_CONFIG);
 	Json::Value  root;
-	IPC_JSON_READ(root)
-	IPC_JSON_ASSERT_TYPE_ARRAY(root, "root")
+	IPC_JSON_READ(root);
+	IPC_JSON_ASSERT_TYPE_ARRAY(root, "root");
 
 	std::vector<std::string>  l;
 
@@ -597,7 +600,7 @@ std::shared_ptr<bar_config_t>  connection::get_bar_config(const std::string&  na
 #define i3IPC_TYPE_STR "GET_BAR_CONFIG"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::GET_BAR_CONFIG, name);
 	Json::Value  root;
-	IPC_JSON_READ(root)
+	IPC_JSON_READ(root);
 	return parse_bar_config_from_json(root);
 #undef i3IPC_TYPE_STR
 }
@@ -607,10 +610,10 @@ bool  connection::send_command(const std::string&  command) const {
 #define i3IPC_TYPE_STR "COMMAND"
 	auto  buf = i3_msg(m_main_socket, ClientMessageType::COMMAND, command);
 	Json::Value  root;
-	IPC_JSON_READ(root)
-	IPC_JSON_ASSERT_TYPE_ARRAY(root, "root")
+	IPC_JSON_READ(root);
+	IPC_JSON_ASSERT_TYPE_ARRAY(root, "root");
 	Json::Value  payload = root[0];
-	IPC_JSON_ASSERT_TYPE_OBJECT(payload, " first item of root")
+	IPC_JSON_ASSERT_TYPE_OBJECT(payload, " first item of root");
 
 	if (payload["success"].asBool()) {
 		return true;
