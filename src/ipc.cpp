@@ -76,8 +76,8 @@ window_properties_t  parse_window_props_from_json(const Json::Value&  value) {
 static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value&  o) {
 #define i3IPC_TYPE_STR "PARSE CONTAINER FROM JSON"
 	if (o.isNull())
-		return std::shared_ptr<container_t>();
-	std::shared_ptr<container_t>  container (new container_t());
+		return nullptr;
+	auto  container{std::make_shared<container_t>()};
 	IPC_JSON_ASSERT_TYPE_OBJECT(o, "o")
 
 	container->id = o["id"].asUInt64();
@@ -152,7 +152,7 @@ static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value
 
 static std::shared_ptr<workspace_t>  parse_workspace_from_json(const Json::Value&  value) {
 	if (value.isNull())
-		return std::shared_ptr<workspace_t>();
+		return nullptr;
 	Json::Value  num = value["num"];
 	Json::Value  name = value["name"];
 	Json::Value  visible = value["visible"];
@@ -161,7 +161,7 @@ static std::shared_ptr<workspace_t>  parse_workspace_from_json(const Json::Value
 	Json::Value  rect = value["rect"];
 	Json::Value  output = value["output"];
 
-	std::shared_ptr<workspace_t>  p (new workspace_t());
+	auto  p{std::make_shared<workspace_t>()};
 	p->num = num.asInt();
 	p->name = name.asString();
 	p->visible = visible.asBool();
@@ -174,14 +174,14 @@ static std::shared_ptr<workspace_t>  parse_workspace_from_json(const Json::Value
 
 static std::shared_ptr<output_t>  parse_output_from_json(const Json::Value&  value) {
 	if (value.isNull())
-		return std::shared_ptr<output_t>();
+		return nullptr;
 	Json::Value  name = value["name"];
 	Json::Value  active = value["active"];
 	Json::Value  primary = value["primary"];
 	Json::Value  current_workspace = value["current_workspace"];
 	Json::Value  rect = value["rect"];
 
-	std::shared_ptr<output_t>  p (new output_t());
+	auto  p{std::make_shared<output_t>()};
 	p->name = name.asString();
 	p->active = active.asBool();
 	p->primary = primary.asBool();
@@ -193,9 +193,9 @@ static std::shared_ptr<output_t>  parse_output_from_json(const Json::Value&  val
 static std::shared_ptr<binding_t>  parse_binding_from_json(const Json::Value&  value) {
 #define i3IPC_TYPE_STR "PARSE BINDING FROM JSON"
 	if (value.isNull())
-		return std::shared_ptr<binding_t>();
+		return nullptr;
 	IPC_JSON_ASSERT_TYPE_OBJECT(value, "binding")
-	std::shared_ptr<binding_t>  b (new binding_t());
+	auto  b{std::make_shared<binding_t>()};
 
 	b->command = value["command"].asString();
 	b->symbol = value["symbol"].asString();
@@ -225,11 +225,11 @@ static std::shared_ptr<binding_t>  parse_binding_from_json(const Json::Value&  v
 
 static std::shared_ptr<mode_t>  parse_mode_from_json(const Json::Value&  value) {
 	if (value.isNull())
-		return std::shared_ptr<mode_t>();
+		return nullptr;
 	Json::Value  change = value["change"];
 	Json::Value  pango_markup = value["pango_markup"];
 
-	std::shared_ptr<mode_t>  p (new mode_t());
+	auto  p{std::make_shared<mode_t>()};
 	p->change = change.asString();
 	p->pango_markup = pango_markup.asBool();
 	return p;
@@ -239,9 +239,9 @@ static std::shared_ptr<mode_t>  parse_mode_from_json(const Json::Value&  value) 
 static std::shared_ptr<bar_config_t>  parse_bar_config_from_json(const Json::Value&  value) {
 #define i3IPC_TYPE_STR "PARSE BAR CONFIG FROM JSON"
 	if (value.isNull())
-		return std::shared_ptr<bar_config_t>();
+		return nullptr;
 	IPC_JSON_ASSERT_TYPE_OBJECT(value, "(root)")
-	std::shared_ptr<bar_config_t>  bc (new bar_config_t());
+	auto  bc{std::make_shared<bar_config_t>()};
 
 	bc->id = value["id"].asString();
 	bc->status_command = value["status_command"].asString();
