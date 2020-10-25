@@ -30,25 +30,20 @@ errno_error::errno_error(const std::string&  msg) : ipc_error(format_errno(msg))
 
 static const std::string  g_i3_ipc_magic = "i3-ipc";
 
-buf_t::buf_t(uint32_t  payload_size) : size(sizeof(header_t) + payload_size) {
-	data = new uint8_t[size];
-	header = (header_t*)data;
-	payload = (char*)(data + sizeof(header_t));
-	strncpy(header->magic, g_i3_ipc_magic.c_str(), sizeof(header->magic));
+buf_t::buf_t(uint32_t  payload_size) : 
+	data(sizeof(header_t) + payload_size, 0),
+	header(reinterpret_cast<header_t*>(data.data())),
+	payload(reinterpret_cast<char*>(data.data() + sizeof(header_t)))
+{
+	std::copy_n(std::begin(g_i3_ipc_magic), sizeof(header->magic), header->magic);
 	header->size = payload_size;
 	header->type = 0x0;
 }
-buf_t::~buf_t() {
-	delete[] data;
-}
 
 void  buf_t::realloc_payload_to_header() {
-	uint8_t*  new_data = new uint8_t[sizeof(header_t) + header->size];
-	memcpy(new_data, header, sizeof(header_t));
-	delete[] data;
-	data = new_data;
-	header = (header_t*)data;
-	payload = (char*)(data + sizeof(header_t));
+	data.resize(sizeof(*header) + header->size);
+	header = reinterpret_cast<header_t*>(data.data());
+	payload = reinterpret_cast<char*>(data.data() + sizeof(header_t));
 }
 
 
@@ -78,10 +73,11 @@ void  i3_disconnect(const int32_t  sockfd) {
 
 
 std::shared_ptr<buf_t>  i3_pack(const ClientMessageType  type, const std::string&  payload) {
-	buf_t*  buff = new buf_t(payload.length());
+	auto  buff{std::make_shared<buf_t>(payload.length())};
 	buff->header->type = static_cast<uint32_t>(type);
-	strncpy(buff->payload, payload.c_str(), buff->header->size);
-	return std::shared_ptr<buf_t>(buff);
+	std::copy_n(std::begin(payload), buff->header->size, buff->payload);
+
+	return buff;
 }
 
 ssize_t  writeall(int  fd, const uint8_t*  buf, size_t  count) {
@@ -112,15 +108,15 @@ ssize_t  swrite(int  fd, const uint8_t*  buf, size_t  count) {
 }
 
 void   i3_send(const int32_t  sockfd, const buf_t&  buff) {
-	swrite(sockfd, buff.data, buff.size);
+	swrite(sockfd, buff.data.data(), buff.data.size());
 }
 
 std::shared_ptr<buf_t>   i3_recv(const int32_t  sockfd) {
-	buf_t*  buff = new buf_t(0);
+	auto buff{std::make_shared<buf_t>(0)};
 	const uint32_t  header_size = sizeof(header_t);
 
 	{
-		uint8_t*  header = (uint8_t*)buff->header;
+		uint8_t*  header = reinterpret_cast<uint8_t*>(buff->header);
 		uint32_t  readed = 0;
 		while (readed < header_size) {
 			int  n = read(sockfd, header + readed, header_size - readed);
@@ -155,7 +151,7 @@ std::shared_ptr<buf_t>   i3_recv(const int32_t  sockfd) {
 		}
 	}
 
-	return std::shared_ptr<buf_t>(buff);
+	return buff;
 }
 
 

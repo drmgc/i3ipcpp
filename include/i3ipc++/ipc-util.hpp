@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <memory>
+#include <vector>
 #include <stdexcept>
 
 // extern "C" {
@@ -93,8 +94,7 @@ enum class ReplyType : uint32_t {
  * @brief i3 IPC message buffer
  */
 struct buf_t {
-	uint32_t  size; ///< @brief Size of whole buffer
-	uint8_t*  data; ///< @brief Pointer to the message
+	std::vector<uint8_t> data;
 
 	/**
 	 * @brief i3 IPC message header
@@ -110,8 +110,7 @@ struct buf_t {
 	 */
 	char*  payload;
 
-	buf_t(uint32_t  payload_size);
-	~buf_t();
+	explicit buf_t(uint32_t  payload_size);
 
 	/**
 	 * @brief Resize payload to the payload_size in the header
