@@ -73,7 +73,7 @@ window_properties_t  parse_window_props_from_json(const Json::Value&  value) {
 }
 
 
-static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value&  o) {
+static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value&  o, std::optional<std::string> workspace_name = std::nullopt) {
 #define i3IPC_TYPE_STR "PARSE CONTAINER FROM JSON"
 	if (o.isNull())
 		return std::shared_ptr<container_t>();
@@ -128,11 +128,31 @@ static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value
 		I3IPC_WARN("Got a unknown \"layout\" property: \"" << layout << "\". Perhaps its neccessary to update i3ipc++. If you are using latest, note maintainer about this")
 	}
 
+	for (auto& member : o.getMemberNames()) {
+		std::string value;
+		try {
+			value = o[member].asString();
+		} catch(const std::exception&) {
+			// Just collect what we can
+			continue;
+		}
+		
+		container->map[member] = value;
+	}
+
+	if (Json::Value value{o["name"]}; container->type == "workspace" && !value.isNull()) {
+		container->workspace = value.asString();
+	} else {
+		// Inherit workspace if any
+		container->workspace = workspace_name;
+	}
+	
+
 	Json::Value  nodes = o["nodes"];
 	if (!nodes.isNull()) {
 		IPC_JSON_ASSERT_TYPE_ARRAY(nodes, "nodes")
 		for (Json::ArrayIndex  i = 0; i < nodes.size(); i++) {
-			container->nodes.push_back(parse_container_from_json(nodes[i]));
+			container->nodes.push_back(parse_container_from_json(nodes[i], container->workspace));
 		}
 	}
 
@@ -140,7 +160,7 @@ static std::shared_ptr<container_t>  parse_container_from_json(const Json::Value
 	if (!floating_nodes.isNull()) {
 		IPC_JSON_ASSERT_TYPE_ARRAY(floating_nodes, "floating_nodes")
 		for (Json::ArrayIndex  i = 0; i < floating_nodes.size(); i++) {
-			container->floating_nodes.push_back(parse_container_from_json(floating_nodes[i]));
+			container->floating_nodes.push_back(parse_container_from_json(floating_nodes[i], container->workspace));
 		}
 	}
 

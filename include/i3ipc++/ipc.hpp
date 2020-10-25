@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <list>
+#include <optional>
 #include <string>
 #include <memory>
 #include <vector>
@@ -198,11 +199,14 @@ struct container_t {
 	rect_t  geometry; ///< The original geometry the window specified when i3 mapped it. Used when switching a window to floating mode, for example
 	bool  urgent;
 	bool  focused;
+	std::optional<std::string> workspace;
 
 	window_properties_t  window_properties; /// X11 window properties
 
 	std::list< std::shared_ptr<container_t> >  nodes;
 	std::list< std::shared_ptr<container_t> >  floating_nodes;
+
+	std::map<std::string, std::string> map;
 };
 
 
