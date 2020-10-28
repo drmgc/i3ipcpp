@@ -304,8 +304,12 @@ static std::shared_ptr<bar_config_t>  parse_bar_config_from_json(const Json::Val
 #undef i3IPC_TYPE_STR
 }
 
-
 std::string  get_socketpath() {
+	const char*  envsock{std::getenv("I3SOCK")};
+	if (envsock) {
+		return envsock;
+	}
+
 	std::string  str;
 	{
 		auss_t  str_buf;
