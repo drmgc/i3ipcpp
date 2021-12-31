@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(i3ipc++)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 string(TIMESTAMP I3IPCppBUILD_DATETIME "%Y-%m-%d %H:%M:%S")
 
 option(I3IPCpp_WITH_TESTS "Build unit tests executables" OFF)
-option(I3IPCpp_BUILD_EXAMPLES "Build example executables" OFF)
+option(I3IPCpp_BUILD_EXAMPLES "Build example executables" ON)
 
 find_package(PkgConfig)
 pkg_check_modules(SIGCPP REQUIRED sigc++-2.0)
@@ -56,18 +60,11 @@ target_link_libraries(i3ipc++
 		${I3IPCpp_LIBRARIES}
 )
 
-target_compile_options(i3ipc++
-	PRIVATE -std=c++11 -Wall -Wextra -Wno-unused-parameter
-)
-
 target_compile_definitions(i3ipc++
 	PRIVATE I3IPC_BUILD_DATETIME="${I3IPCppBUILD_DATETIME}"
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "DEBUG")
-	target_compile_options(i3ipc++
-		PUBLIC -g3
-	)
 	target_compile_definitions(i3ipc++
 		PRIVATE DEBUG=1
 	)
@@ -103,9 +100,6 @@ if(I3IPCpp_WITH_TESTS)
 		enable_testing()
 		file(GLOB SRC_TEST test/*.hpp)
 		CXXTEST_ADD_TEST(i3ipcpp_check test.cpp ${SRC_TEST})
-		target_compile_options(i3ipcpp_check
-			PUBLIC -std=c++11 -Wall -Wextra -Wno-unused-parameter -g3
-		)
 		target_compile_definitions(i3ipcpp_check
 			PRIVATE DEBUG=1
 		)
