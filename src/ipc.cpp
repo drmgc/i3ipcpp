@@ -45,8 +45,8 @@ std::vector<std::ostream*>  g_logging_err_outs = {
 
 inline rect_t  parse_rect_from_json(const Json::Value&  value) {
 	return {
-		.x = value["x"].asUInt(),
-		.y = value["y"].asUInt(),
+		.x = value["x"].asInt(),
+		.y = value["y"].asInt(),
 		.width = value["width"].asUInt(),
 		.height = value["height"].asUInt(),
 	};

@@ -30,8 +30,8 @@ std::string  get_socketpath();
  * Primitive of rectangle
  */
 struct rect_t {
-	uint32_t  x; ///< Position on X axis
-	uint32_t  y; ///< Position on Y axis
+	int32_t  x; ///< Position on X axis
+	int32_t  y; ///< Position on Y axis
 	uint32_t  width; ///< Width of rectangle
 	uint32_t  height; ///< Height of rectangle
 };
