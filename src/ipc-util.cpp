@@ -8,6 +8,7 @@ extern "C" {
 #include <errno.h>
 }
 
+#include <algorithm>
 #include <cstring>
 #include <ios>
 
@@ -30,7 +31,7 @@ errno_error::errno_error(const std::string&  msg) : ipc_error(format_errno(msg))
 
 static const std::string  g_i3_ipc_magic = "i3-ipc";
 
-buf_t::buf_t(uint32_t  payload_size) : 
+buf_t::buf_t(uint32_t  payload_size) :
 	data(sizeof(header_t) + payload_size, 0),
 	header(reinterpret_cast<header_t*>(data.data())),
 	payload(reinterpret_cast<char*>(data.data() + sizeof(header_t)))
@@ -54,7 +55,7 @@ int32_t  i3_connect(const std::string&  socket_path) {
 	}
 
 	(void)fcntl(sockfd, F_SETFD, FD_CLOEXEC); // What for?
-	
+
 	struct sockaddr_un addr;
 	memset(&addr, 0, sizeof(struct sockaddr_un));
 	addr.sun_family = AF_LOCAL;
