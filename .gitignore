@@ -1,4 +1,8 @@
-build
-doc
+build/
+doc/
 *.sublime-workspace
 *.log
+
+.ccls*
+*.o
+compile_commands.*
