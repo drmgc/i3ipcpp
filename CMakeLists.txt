@@ -4,10 +4,20 @@ project(i3ipc++)
 option(I3IPCpp_WITH_TESTS "Build unit tests executables" OFF)
 option(I3IPCpp_BUILD_EXAMPLES "Build example executables" OFF)
 
-find_package(PkgConfig)
-pkg_check_modules(SIGCPP REQUIRED sigc++-2.0)
-pkg_check_modules(JSONCPP REQUIRED jsoncpp)
 
+file(GLOB_RECURSE SRC src/*.cpp)
+add_library(i3ipc++ ${SRC})
+
+find_package(PkgConfig)
+pkg_check_modules(JSONCPP REQUIRED jsoncpp)
+pkg_check_modules(SIGCPP  sigc++-3.0)
+if(SIGCPP_FOUND)
+   target_compile_definitions(i3ipc++
+ 	PUBLIC I3CPP_IPC_SIGCPP3=${SIGCPP_FOUND}
+  )
+else()
+pkg_check_modules(SIGCPP REQUIRED sigc++-2.0)
+endif()
 
 set(I3IPCpp_INCLUDE_DIRS
 	${SIGCPP_INCLUDE_DIRS}
@@ -31,8 +41,6 @@ set(I3IPCpp_LIBRARIES
 # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g3 -DDEBUG")
 # set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 
-file(GLOB_RECURSE SRC src/*.cpp)
-add_library(i3ipc++ ${SRC})
 
 target_include_directories(i3ipc++
 	PUBLIC
