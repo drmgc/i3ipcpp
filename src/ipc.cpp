@@ -661,7 +661,7 @@ const version_t&  get_version() {
 #define I3IPC_VERSION_MINOR  5
 #define I3IPC_VERSION_PATCH  0
 	static version_t  version = {
-		.human_readable = auss_t() << I3IPC_VERSION_MAJOR << '.' << I3IPC_VERSION_MINOR << '.' << I3IPC_VERSION_PATCH  << " (built on " << I3IPC_BUILD_DATETIME << ")",
+		.human_readable = auss_t() << I3IPC_VERSION_MAJOR << '.' << I3IPC_VERSION_MINOR << '.' << I3IPC_VERSION_PATCH,
 		.loaded_config_file_name = std::string(),
 		.major = I3IPC_VERSION_MAJOR,
 		.minor = I3IPC_VERSION_MINOR,

@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(i3ipc++)
 
-string(TIMESTAMP I3IPCppBUILD_DATETIME "%Y-%m-%d %H:%M:%S")
-
 option(I3IPCpp_WITH_TESTS "Build unit tests executables" OFF)
 option(I3IPCpp_BUILD_EXAMPLES "Build example executables" OFF)
 
@@ -58,10 +56,6 @@ target_link_libraries(i3ipc++
 
 target_compile_options(i3ipc++
 	PRIVATE -std=c++17 -Wall -Wextra -Wno-unused-parameter
-)
-
-target_compile_definitions(i3ipc++
-	PRIVATE I3IPC_BUILD_DATETIME="${I3IPCppBUILD_DATETIME}"
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "DEBUG")
