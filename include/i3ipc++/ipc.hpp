@@ -369,14 +369,21 @@ public:
 	 * Disconnect the event socket
 	 */
 	void  disconnect_event_socket();
-
-	sigc::signal<void, const workspace_event_t&>  signal_workspace_event; ///< Workspace event signal
+#ifdef I3CPP_IPC_SIGCPP3
+        sigc::signal<void(const workspace_event_t&)>  signal_workspace_event; ///< Workspace event signal
+	sigc::signal<void()> signal_output_event; ///< Output event signal
+	sigc::signal<void(const mode_t&)>  signal_mode_event; ///< Output mode event signal
+	sigc::signal<void(const window_event_t&)>  signal_window_event; ///< Window event signal
+	sigc::signal<void(const bar_config_t&)>  signal_barconfig_update_event; ///< Barconfig update event signal
+	sigc::signal<void(const binding_t&)>  signal_binding_event; ///< Binding event signal
+	sigc::signal<void(EventType, const std::shared_ptr<const buf_t>&)>  signal_event; ///< i3 event signal @note Default handler routes event to signal according to type
+#else
+    sigc::signal<void, const workspace_event_t&>  signal_workspace_event; ///< Workspace event signal
 	sigc::signal<void>  signal_output_event; ///< Output event signal
 	sigc::signal<void, const mode_t&>  signal_mode_event; ///< Output mode event signal
 	sigc::signal<void, const window_event_t&>  signal_window_event; ///< Window event signal
 	sigc::signal<void, const bar_config_t&>  signal_barconfig_update_event; ///< Barconfig update event signal
-	sigc::signal<void, const binding_t&>  signal_binding_event; ///< Binding event signal
-	sigc::signal<void, EventType, const std::shared_ptr<const buf_t>&>  signal_event; ///< i3 event signal @note Default handler routes event to signal according to type
+#endif
 private:
 	const int32_t  m_main_socket;
 	int32_t  m_event_socket;

@@ -10,6 +10,7 @@ An implementation of i3 IPC in C++11.
 * C++11 compiler
 * sigc++ 2.0
 * jsoncpp
+* i3 (for i3/ipc.h)
 
 ## Using
 Yet the only way of using is to add this repo as a submodule

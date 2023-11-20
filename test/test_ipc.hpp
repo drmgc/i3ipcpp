@@ -14,7 +14,7 @@ public:
 			auto  buff = i3_pack(ClientMessageType::COMMAND, "exit");
 			auss_t  auss;
 			auss << std::hex;
-			for (uint32_t  i = 0; i < buff->size; i++) {
+			for (uint32_t  i = 0; i < buff->data.size(); i++) {
 				if (buff->data[i] < 0x10) {
 					auss << '0';
 				}
