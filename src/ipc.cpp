@@ -355,6 +355,8 @@ connection::connection(const std::string&  socket_path) : m_main_socket(i3_conne
 				ev.type = WorkspaceEventType::RELOAD;
 			} else if (change == "restored") {
 				ev.type = WorkspaceEventType::RESTORED;
+			} else if(change == "move") {
+				ev.type = WorkspaceEventType::MOVE;
 			} else {
 				I3IPC_WARN("Unknown workspace event type " << change)
 				break;
