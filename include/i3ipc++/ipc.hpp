@@ -95,6 +95,7 @@ enum class WorkspaceEventType : char {
 	RENAME = 'r', ///< Renamed
 	RELOAD = 'l', ///< Reloaded
 	RESTORED = 's', ///< Restored
+	MOVE = 'm', ///< Moved (to output)
 };
 
 /**
